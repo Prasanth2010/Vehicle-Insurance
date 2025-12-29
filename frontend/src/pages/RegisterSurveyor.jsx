@@ -1,0 +1,461 @@
+import { useState } from 'react';
+import axios from 'axios';
+import AdminNavbar from '../components/AdminNavbar';
+import { FaUserTie, FaEnvelope, FaLock, FaPhone, FaUser, FaVenusMars, FaMapMarkerAlt, FaCity, FaHashtag, FaClipboardCheck } from 'react-icons/fa';
+
+export default function RegisterSurveyor() {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    contactNo: '',
+    age: '',
+    gender: 'Male',
+    street: '',
+    city: '',
+    pincode: ''
+  });
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMessage('');
+    setError('');
+    setLoading(true);
+
+    const surveyorData = {
+      ...formData,
+      role: 'SURVEYOR'
+    };
+
+    try {
+      const res = await axios.post('http://localhost:8080/admin/add-user', surveyorData);
+      setMessage(`✅ New Surveyor Account Created Successfully!
+
+👤 Name: ${surveyorData.firstName} ${surveyorData.lastName}
+📧 Email: ${surveyorData.email}
+🔐 Password: ${surveyorData.password}
+
+Share these credentials with the surveyor.
+Login URL: /surveyor/login`);
+
+      // Reset form
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        password: '',
+        contactNo: '',
+        age: '',
+        gender: 'Male',
+        street: '',
+        city: '',
+        pincode: ''
+      });
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to create surveyor account. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <AdminNavbar />
+      
+      <div className="container-padding py-8 pt-24">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-orange-600 to-amber-500 rounded-2xl mb-6">
+              <FaUserTie className="text-3xl text-white" />
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-3">
+              Register New Surveyor
+            </h1>
+            <p className="text-gray-600">
+              Create a new surveyor account for damage assessment and claim verification
+            </p>
+          </div>
+
+          {/* Success Message */}
+          {message && (
+            <div className="mb-8 p-6 bg-amber-50 border border-amber-200 rounded-2xl">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
+                    <FaUserTie className="text-amber-600" />
+                  </div>
+                </div>
+                <div className="ml-4">
+                  <h3 className="text-lg font-semibold text-amber-900 mb-2">
+                    Surveyor Account Created
+                  </h3>
+                  <pre className="text-sm text-amber-700 whitespace-pre-wrap bg-amber-100/50 p-4 rounded-lg">
+                    {message}
+                  </pre>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Error Message */}
+          {error && (
+            <div className="mb-8 p-6 bg-red-50 border border-red-200 rounded-2xl">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                    <span className="text-red-600">⚠️</span>
+                  </div>
+                </div>
+                <div className="ml-4">
+                  <p className="text-red-700">{error}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Form Card */}
+          <div className="glass-card rounded-2xl shadow-xl p-8">
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Personal Information Section */}
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                  <FaUser className="mr-2 text-orange-600" />
+                  Personal Information
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      First Name *
+                    </label>
+                    <input
+                      type="text"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      required
+                      className="input-field pl-10"
+                      placeholder="Enter first name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Last Name *
+                    </label>
+                    <input
+                      type="text"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      required
+                      className="input-field pl-10"
+                      placeholder="Enter last name"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Age *
+                    </label>
+                    <input
+                      type="number"
+                      name="age"
+                      value={formData.age}
+                      onChange={handleChange}
+                      required
+                      min="18"
+                      max="100"
+                      className="input-field pl-10"
+                      placeholder="Enter age"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Gender *
+                    </label>
+                    <div className="relative">
+                      <select
+                        name="gender"
+                        value={formData.gender}
+                        onChange={handleChange}
+                        className="input-field pl-10"
+                      >
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                      </select>
+                      <FaVenusMars className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Contact Information Section */}
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                  <FaEnvelope className="mr-2 text-orange-600" />
+                  Contact Information
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email Address *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        required
+                        className="input-field pl-10"
+                        placeholder="surveyor@example.com"
+                      />
+                      <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Password *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        required
+                        className="input-field pl-10"
+                        placeholder="Create a strong password"
+                      />
+                      <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    </div>
+                    <p className="mt-2 text-xs text-gray-500">
+                      Must be at least 6 characters long
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Phone Number *
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="tel"
+                        name="contactNo"
+                        value={formData.contactNo}
+                        onChange={handleChange}
+                        required
+                        className="input-field pl-10"
+                        placeholder="Enter phone number"
+                        pattern="[0-9]{10}"
+                      />
+                      <FaPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    </div>
+                    <p className="mt-2 text-xs text-gray-500">10-digit number without spaces</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Address Information Section */}
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                  <FaMapMarkerAlt className="mr-2 text-orange-600" />
+                  Address Information
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Street Address
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        name="street"
+                        value={formData.street}
+                        onChange={handleChange}
+                        className="input-field pl-10"
+                        placeholder="Enter street address"
+                      />
+                      <FaMapMarkerAlt className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      City
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        name="city"
+                        value={formData.city}
+                        onChange={handleChange}
+                        className="input-field pl-10"
+                        placeholder="Enter city"
+                      />
+                      <FaCity className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Pincode
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        name="pincode"
+                        value={formData.pincode}
+                        onChange={handleChange}
+                        className="input-field pl-10"
+                        placeholder="Enter pincode"
+                        pattern="[0-9]{6}"
+                      />
+                      <FaHashtag className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Surveyor Responsibilities */}
+              {/* <div className="p-6 bg-amber-50 rounded-xl border border-amber-200">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
+                      <FaClipboardCheck className="text-amber-600 text-sm" />
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    <h4 className="text-sm font-semibold text-amber-900 mb-2">
+                      Surveyor Responsibilities
+                    </h4>
+                    <ul className="text-sm text-amber-700 space-y-1">
+                      <li>• Conduct on-site damage assessments for insurance claims</li>
+                      <li>• Verify claim details and documentation</li>
+                      <li>• Submit detailed assessment reports</li>
+                      <li>• Coordinate with customers for inspection scheduling</li>
+                      <li>• Provide technical expertise for claim validation</li>
+                    </ul>
+                  </div>
+                </div>
+              </div> */}
+
+              {/* Submit Button */}
+              <div className="pt-8 border-t border-gray-200">
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormData({
+                        firstName: '',
+                        lastName: '',
+                        email: '',
+                        password: '',
+                        contactNo: '',
+                        age: '',
+                        gender: 'Male',
+                        street: '',
+                        city: '',
+                        pincode: ''
+                      });
+                      setMessage('');
+                      setError('');
+                    }}
+                    className="btn-secondary py-3 px-8"
+                    disabled={loading}
+                  >
+                    Clear All
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="flex-1 bg-gradient-to-r from-orange-600 to-amber-500 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-200 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50"
+                  >
+                    {loading ? (
+                      <span className="flex items-center justify-center">
+                        <svg className="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                        </svg>
+                        Creating Surveyor Account...
+                      </span>
+                    ) : (
+                      <span className="flex items-center justify-center btn-secondary">
+                        <FaUserTie className="mr-2" />
+                        Create Surveyor Account
+                      </span>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          {/* Surveyor Login Information */}
+          {/* <div className="mt-8 p-6 bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl border border-orange-200">
+            <div className="text-center">
+              <div className="inline-flex items-center justify-center w-12 h-12 bg-orange-100 rounded-full mb-4">
+                <FaUserTie className="text-orange-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Surveyor Login Information
+              </h3>
+              <p className="text-gray-600 mb-4">
+                After account creation, surveyor can login at:
+              </p>
+              <div className="bg-white p-4 rounded-lg border border-gray-200 inline-block">
+                <code className="text-sm font-mono text-orange-600">
+                  http://localhost:5173/surveyor/login
+                </code>
+              </div>
+              <div className="mt-4 text-sm text-gray-500">
+                Note: Surveyor panel will be available once surveyor logs in
+              </div>
+            </div>
+          </div> */}
+
+          {/* Important Notes */}
+          {/* <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="p-5 bg-blue-50 rounded-xl border border-blue-200">
+              <h4 className="font-semibold text-blue-900 mb-2 flex items-center">
+                <FaClipboardCheck className="mr-2 text-blue-600" />
+                Training Requirements
+              </h4>
+              <ul className="text-sm text-blue-700 space-y-1">
+                <li>• Insurance claim assessment procedures</li>
+                <li>• Damage evaluation techniques</li>
+                <li>• Report documentation standards</li>
+                <li>• Customer interaction protocols</li>
+              </ul>
+            </div>
+
+            <div className="p-5 bg-emerald-50 rounded-xl border border-emerald-200">
+              <h4 className="font-semibold text-emerald-900 mb-2 flex items-center">
+                <FaLock className="mr-2 text-emerald-600" />
+                Access Limitations
+              </h4>
+              <ul className="text-sm text-emerald-700 space-y-1">
+                <li>• Can view assigned claims only</li>
+                <li>• No access to financial data</li>
+                <li>• Cannot modify policy details</li>
+                <li>• Limited user management access</li>
+              </ul>
+            </div>
+          </div> */}
+        </div>
+      </div>
+    </div>
+  );
+}

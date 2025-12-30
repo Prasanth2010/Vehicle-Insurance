@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
-import AdminNavbar from '../components/AdminNavbar';
+import AdminNavbar from '../../components/AdminNavbar';
 import { PlusIcon, ShieldCheckIcon, CurrencyRupeeIcon, DocumentTextIcon, IdentificationIcon, TagIcon, PencilIcon } from '@heroicons/react/24/outline';
 
 export default function PolicyDetails() {
@@ -221,53 +221,3 @@ export default function PolicyDetails() {
   );
 }
 
-
-// import { useEffect, useState } from 'react';
-// import { useParams } from 'react-router-dom';
-// import axios from 'axios';
-// import AdminNavbar from '../components/AdminNavbar';
-
-// export default function PolicyDetails() {
-//   const { id } = useParams();
-//   const [policy, setPolicy] = useState(null);
-//   const [coverages, setCoverages] = useState([]);
-
-//   useEffect(() => {
-//     axios.get(`http://localhost:8080/api/policies`)
-//       .then(res => setPolicy(res.data.find(p => p.id == id)));
-//     axios.get(`http://localhost:8080/api/policies/${id}/coverages`)
-//       .then(res => setCoverages(res.data));
-//   }, [id]);
-
-//   if (!policy) return <p className="text-center text-3xl">Loading...</p>;
-
-//   return (
-//     <div className="min-h-screen bg-black text-white">
-//       <AdminNavbar />
-//       <div className="max-w-7xl mx-auto px-8 py-20">
-//         <h1 className="text-6xl font-bold text-lime-400 text-center mb-16">Policy Details</h1>
-//         <div className="bg-gray-900 p-12 rounded-3xl border-4 border-lime-400 mb-16">
-//           <h2 className="text-4xl font-bold text-lime-400 mb-6">{policy.name}</h2>
-//           <p className="text-xl mb-4">ID: {policy.id}</p>
-//           <p className="text-xl mb-4">Description: {policy.description}</p>
-//           <p className="text-xl mb-4">Plan: {policy.plan}</p>
-//           <p className="text-3xl font-bold mb-8">Premium: ₹{policy.premiumAmount}</p>
-//           <a href={`/admin/add-coverage/${policy.id}`} className="bg-lime-400 text-black px-8 py-4 rounded-xl font-bold">
-//             Add Coverage
-//           </a>
-//         </div>
-
-//         <h2 className="text-5xl font-bold text-lime-400 mb-12">Coverages</h2>
-//         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-//           {coverages.map(c => (
-//             <div key={c.id} className="bg-gray-900 p-8 rounded-2xl border-4 border-lime-400">
-//               <h3 className="text-3xl font-bold text-lime-400 mb-4">{c.type}</h3>
-//               <p className="text-xl mb-4">{c.description}</p>
-//               <p className="text-2xl font-bold">Amount: ₹{c.amount}</p>
-//             </div>
-//           ))}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// }

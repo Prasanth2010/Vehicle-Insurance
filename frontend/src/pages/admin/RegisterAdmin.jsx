@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import axios from 'axios';
-import AdminNavbar from '../components/AdminNavbar';
-import { FaUserTie, FaEnvelope, FaLock, FaPhone, FaUser, FaVenusMars, FaMapMarkerAlt, FaCity, FaHashtag, FaClipboardCheck } from 'react-icons/fa';
+import AdminNavbar from '../../components/AdminNavbar';
+import { FaUserShield, FaEnvelope, FaLock, FaPhone, FaUser, FaVenusMars, FaMapMarkerAlt, FaCity, FaHashtag } from 'react-icons/fa';
 
-export default function RegisterSurveyor() {
+export default function RegisterAdmin() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -30,22 +30,21 @@ export default function RegisterSurveyor() {
     setError('');
     setLoading(true);
 
-    const surveyorData = {
+    const adminData = {
       ...formData,
-      role: 'SURVEYOR'
+      role: 'ADMIN'
     };
 
     try {
-      const res = await axios.post('http://localhost:8080/admin/add-user', surveyorData);
-      setMessage(`✅ New Surveyor Account Created Successfully!
+      await axios.post('http://localhost:8080/admin/add-user', adminData);
+      setMessage(`✅ New Admin Account Created Successfully!
 
-👤 Name: ${surveyorData.firstName} ${surveyorData.lastName}
-📧 Email: ${surveyorData.email}
-🔐 Password: ${surveyorData.password}
+📧 Email: ${adminData.email}
+🔐 Password: ${adminData.password}
 
-Share these credentials with the surveyor.
-Login URL: /surveyor/login`);
-
+Share these credentials with the new administrator.
+Login URL: /admin/login`);
+      
       // Reset form
       setFormData({
         firstName: '',
@@ -60,7 +59,7 @@ Login URL: /surveyor/login`);
         pincode: ''
       });
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create surveyor account. Please try again.');
+      setError(err.response?.data?.message || 'Failed to create admin account. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -74,31 +73,31 @@ Login URL: /surveyor/login`);
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-10">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-orange-600 to-amber-500 rounded-2xl mb-6">
-              <FaUserTie className="text-3xl text-white" />
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-600 to-emerald-500 rounded-2xl mb-6">
+              <FaUserShield className="text-3xl text-white" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-3">
-              Register New Surveyor
+              Register New Administrator
             </h1>
             <p className="text-gray-600">
-              Create a new surveyor account for damage assessment and claim verification
+              Create a new administrator account for the insurance management system
             </p>
           </div>
 
           {/* Success Message */}
           {message && (
-            <div className="mb-8 p-6 bg-amber-50 border border-amber-200 rounded-2xl">
+            <div className="mb-8 p-6 bg-emerald-50 border border-emerald-200 rounded-2xl">
               <div className="flex items-start">
                 <div className="flex-shrink-0">
-                  <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
-                    <FaUserTie className="text-amber-600" />
+                  <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center">
+                    <FaUserShield className="text-emerald-600" />
                   </div>
                 </div>
                 <div className="ml-4">
-                  <h3 className="text-lg font-semibold text-amber-900 mb-2">
-                    Surveyor Account Created
+                  <h3 className="text-lg font-semibold text-emerald-900 mb-2">
+                    Administrator Account Created
                   </h3>
-                  <pre className="text-sm text-amber-700 whitespace-pre-wrap bg-amber-100/50 p-4 rounded-lg">
+                  <pre className="text-sm text-emerald-700 whitespace-pre-wrap bg-emerald-100/50 p-4 rounded-lg">
                     {message}
                   </pre>
                 </div>
@@ -128,7 +127,7 @@ Login URL: /surveyor/login`);
               {/* Personal Information Section */}
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-                  <FaUser className="mr-2 text-orange-600" />
+                  <FaUser className="mr-2 text-blue-600" />
                   Personal Information
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -203,7 +202,7 @@ Login URL: /surveyor/login`);
               {/* Contact Information Section */}
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-                  <FaEnvelope className="mr-2 text-orange-600" />
+                  <FaEnvelope className="mr-2 text-blue-600" />
                   Contact Information
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -219,7 +218,7 @@ Login URL: /surveyor/login`);
                         onChange={handleChange}
                         required
                         className="input-field pl-10"
-                        placeholder="surveyor@example.com"
+                        placeholder="admin@example.com"
                       />
                       <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                     </div>
@@ -271,7 +270,7 @@ Login URL: /surveyor/login`);
               {/* Address Information Section */}
               <div>
                 <h2 className="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-                  <FaMapMarkerAlt className="mr-2 text-orange-600" />
+                  <FaMapMarkerAlt className="mr-2 text-blue-600" />
                   Address Information
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -329,25 +328,21 @@ Login URL: /surveyor/login`);
                 </div>
               </div>
 
-              {/* Surveyor Responsibilities */}
-              {/* <div className="p-6 bg-amber-50 rounded-xl border border-amber-200">
+              {/* Admin Note */}
+              {/* <div className="p-6 bg-blue-50 rounded-xl border border-blue-200">
                 <div className="flex items-start">
                   <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
-                      <FaClipboardCheck className="text-amber-600 text-sm" />
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <FaUserShield className="text-blue-600 text-sm" />
                     </div>
                   </div>
                   <div className="ml-4">
-                    <h4 className="text-sm font-semibold text-amber-900 mb-2">
-                      Surveyor Responsibilities
+                    <h4 className="text-sm font-semibold text-blue-900 mb-1">
+                      Administrator Account Note
                     </h4>
-                    <ul className="text-sm text-amber-700 space-y-1">
-                      <li>• Conduct on-site damage assessments for insurance claims</li>
-                      <li>• Verify claim details and documentation</li>
-                      <li>• Submit detailed assessment reports</li>
-                      <li>• Coordinate with customers for inspection scheduling</li>
-                      <li>• Provide technical expertise for claim validation</li>
-                    </ul>
+                    <p className="text-sm text-blue-700">
+                      This account will have full administrative privileges including access to all system features, user management, claims processing, and policy management.
+                    </p>
                   </div>
                 </div>
               </div> */}
@@ -381,7 +376,7 @@ Login URL: /surveyor/login`);
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 bg-gradient-to-r from-orange-600 to-amber-500 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-200 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50"
+                    className="flex-1 btn-primary py-3 disabled:opacity-50"
                   >
                     {loading ? (
                       <span className="flex items-center justify-center">
@@ -389,12 +384,12 @@ Login URL: /surveyor/login`);
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                         </svg>
-                        Creating Surveyor Account...
+                        Creating Admin Account...
                       </span>
                     ) : (
-                      <span className="flex items-center justify-center btn-secondary">
-                        <FaUserTie className="mr-2" />
-                        Create Surveyor Account
+                      <span className="flex items-center justify-center">
+                        <FaUserShield className="mr-2" />
+                        Create Administrator Account
                       </span>
                     )}
                   </button>
@@ -403,55 +398,23 @@ Login URL: /surveyor/login`);
             </form>
           </div>
 
-          {/* Surveyor Login Information */}
-          {/* <div className="mt-8 p-6 bg-gradient-to-r from-orange-50 to-amber-50 rounded-xl border border-orange-200">
-            <div className="text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-orange-100 rounded-full mb-4">
-                <FaUserTie className="text-orange-600" />
+          {/* Security Note */}
+          {/* <div className="mt-8 p-6 bg-gray-50 rounded-xl border border-gray-200">
+            <div className="flex items-center text-sm text-gray-600">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                  <FaLock className="text-gray-500" />
+                </div>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Surveyor Login Information
-              </h3>
-              <p className="text-gray-600 mb-4">
-                After account creation, surveyor can login at:
-              </p>
-              <div className="bg-white p-4 rounded-lg border border-gray-200 inline-block">
-                <code className="text-sm font-mono text-orange-600">
-                  http://localhost:5173/surveyor/login
-                </code>
+              <div className="ml-4">
+                <p className="font-medium text-gray-900">Security Guidelines</p>
+                <ul className="mt-2 text-sm text-gray-600 space-y-1">
+                  <li>• Share credentials securely via encrypted channels</li>
+                  <li>• Advise the new admin to change password on first login</li>
+                  <li>• Monitor admin activities regularly</li>
+                  <li>• Revoke access immediately if suspicious activity is detected</li>
+                </ul>
               </div>
-              <div className="mt-4 text-sm text-gray-500">
-                Note: Surveyor panel will be available once surveyor logs in
-              </div>
-            </div>
-          </div> */}
-
-          {/* Important Notes */}
-          {/* <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="p-5 bg-blue-50 rounded-xl border border-blue-200">
-              <h4 className="font-semibold text-blue-900 mb-2 flex items-center">
-                <FaClipboardCheck className="mr-2 text-blue-600" />
-                Training Requirements
-              </h4>
-              <ul className="text-sm text-blue-700 space-y-1">
-                <li>• Insurance claim assessment procedures</li>
-                <li>• Damage evaluation techniques</li>
-                <li>• Report documentation standards</li>
-                <li>• Customer interaction protocols</li>
-              </ul>
-            </div>
-
-            <div className="p-5 bg-emerald-50 rounded-xl border border-emerald-200">
-              <h4 className="font-semibold text-emerald-900 mb-2 flex items-center">
-                <FaLock className="mr-2 text-emerald-600" />
-                Access Limitations
-              </h4>
-              <ul className="text-sm text-emerald-700 space-y-1">
-                <li>• Can view assigned claims only</li>
-                <li>• No access to financial data</li>
-                <li>• Cannot modify policy details</li>
-                <li>• Limited user management access</li>
-              </ul>
             </div>
           </div> */}
         </div>

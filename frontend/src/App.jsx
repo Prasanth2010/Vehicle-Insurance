@@ -1,22 +1,22 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
-import Register from './pages/Register';
-import Login from './pages/Login';
-import UserDashboard from './pages/UserDashboard';
-import AdminLogin from './pages/AdminLogin';
-import AdminPanel from './pages/AdminPanel';
-import AddPolicy from './pages/AddPolicy';
-import Policies from './pages/Policies'; 
-import Claims from './pages/Claims';      
-import Customers from './pages/Customers';
-import Applications from './pages/Applications';
-import RegisterAdmin from './pages/RegisterAdmin';
-import RegisterSurveyor from './pages/RegisterSurveyor';
-import Surveyors from './pages/Surveyors';
-import AddCoverage from './pages/AddCoverage';
-import PolicyDetails from './pages/PolicyDetails';
-import SurveyorPanel from './pages/SurveyorPanel';
-import SurveyorLogin from './pages/SurveyorLogin';
+import Register from './pages/user/Register';
+import Login from './pages/user/Login';
+import UserDashboard from './pages/user/UserDashboard';
+import AdminLogin from './pages/admin/AdminLogin';
+import AdminPanel from './pages/admin/AdminPanel';
+import AddPolicy from './pages/admin/AddPolicy';
+import Policies from './pages/admin/Policies'; 
+import Claims from './pages/admin/Claims';      
+import Customers from './pages/admin/Customers';
+import Applications from './pages/admin/Applications';
+import RegisterAdmin from './pages/admin/RegisterAdmin';
+import RegisterSurveyor from './pages/admin/RegisterSurveyor';
+import Surveyors from './pages/admin/Surveyors';
+import AddCoverage from './pages/admin/AddCoverage';
+import PolicyDetails from './pages/admin/PolicyDetails';
+import SurveyorPanel from './pages/surveyor/SurveyorPanel';
+import SurveyorLogin from './pages/surveyor/SurveyorLogin';
 
 
 function App() {

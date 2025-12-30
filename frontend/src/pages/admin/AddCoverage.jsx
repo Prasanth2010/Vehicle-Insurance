@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import AdminNavbar from '../components/AdminNavbar';
+import AdminNavbar from '../../components/AdminNavbar';
 import { ArrowLeftIcon, PlusCircleIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
 
 export default function AddCoverage() {

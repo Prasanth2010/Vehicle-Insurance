@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import AdminNavbar from '../components/AdminNavbar';
+import AdminNavbar from '../../components/AdminNavbar';
 
 export default function AdminHome() {
   const user = JSON.parse(localStorage.getItem('user') || '{}');

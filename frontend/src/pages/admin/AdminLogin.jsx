@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import Header from '../components/Header';
+import Header from '../../components/Header';
 
 export default function AdminLogin() {
   const navigate = useNavigate();

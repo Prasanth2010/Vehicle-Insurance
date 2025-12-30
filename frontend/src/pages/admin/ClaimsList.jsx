@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import AdminNavbar from '../components/AdminNavbar';
+import AdminNavbar from '../../components/AdminNavbar';
 
 export default function ClaimsList() {
   const [claims, setClaims] = useState([]);

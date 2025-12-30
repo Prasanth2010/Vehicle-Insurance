@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import AdminNavbar from '../components/AdminNavbar';
+import AdminNavbar from '../../components/AdminNavbar';
 
 export default function Applications() {
   const [applications] = useState([

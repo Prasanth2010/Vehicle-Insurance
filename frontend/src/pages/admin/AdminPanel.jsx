@@ -339,7 +339,7 @@ export default function AdminPanel() {
                 ) : (
                   recentActivities
                     .filter(activity => activity.type === 'claim')
-                    .slice(0, 4)
+                    .slice(0, 6)
                     .map(activity => (
                       <ActivityItem key={activity.id} {...activity} />
                     ))
@@ -380,8 +380,9 @@ export default function AdminPanel() {
                       </div>
                       <span className={`px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
                         activity.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        activity.status === 'approved' ? 'bg-green-100 text-emerald-800' :
-                        activity.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                        activity.status === 'approved' ? 'bg-green-100 text-green-800' :
+                        activity.status === 'completed' ? 'bg-green-100 text-green-800' :
+                        activity.status === 'rejected' ? 'bg-red-100 text-red-800' :
                         'bg-purple-100 text-purple-800'
                       }`}>
                         {activity.status}

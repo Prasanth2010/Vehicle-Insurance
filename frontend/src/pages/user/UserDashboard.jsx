@@ -1,22 +1,20 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
+import { useLocation } from 'react-router-dom';
 import { 
-  PlusCircleIcon, 
-  XMarkIcon,
   DocumentTextIcon,
   ClockIcon,
   CheckCircleIcon,
   XCircleIcon,
-  PhotoIcon,
-  ArrowUpTrayIcon,
   ExclamationTriangleIcon,
   UserCircleIcon,
   ShieldCheckIcon
 } from '@heroicons/react/24/outline';
 
 export default function UserDashboard() {
+  const navigate = useNavigate();
   const storedUser = localStorage.getItem('user');
   const user = storedUser ? JSON.parse(storedUser) : null;
 
@@ -24,124 +22,45 @@ export default function UserDashboard() {
   const [policies, setPolicies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
-  const [formData, setFormData] = useState({
-    policyId: '',
-    description: '',
-    damagePhoto: null
-  });
-  const [message, setMessage] = useState('');
-  const [showClaimForm, setShowClaimForm] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (user && user.id) {
       fetchDashboardData();
     }
-  }, [user]);
+  }, []);
 
   const fetchDashboardData = async () => {
+    setLoading(true);
+    setError('');
+    
     try {
-      const [claimsRes, policiesRes] = await Promise.all([
-        axios.get(`http://localhost:8080/api/claims/my?userId=${user.id}`),
-        axios.get('http://localhost:8080/api/policies')
-      ]);
-      setClaims(claimsRes.data);
-      setPolicies(policiesRes.data);
+      const policiesRes = await axios.get('http://localhost:8080/api/policies');
+      setPolicies(policiesRes.data || []);
+
+      try {
+        const claimsRes = await axios.get(`http://localhost:8080/api/claims/my?userId=${user.id}`);
+        setClaims(claimsRes.data || []);
+      } catch (claimsErr) {
+        console.warn('Claims fetch failed:', claimsErr);
+        setClaims([]);
+      }
     } catch (err) {
-      console.error('Failed to fetch data:', err);
+      setError('Failed to load dashboard data. Please try again later.');
+      setPolicies([]);
+      setClaims([]);
     } finally {
       setLoading(false);
     }
   };
+const location = useLocation();
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        setMessage('File size must be less than 5MB');
-        e.target.value = '';
-        return;
-      }
-      setFormData({ ...formData, damagePhoto: file });
-    }
-  };
+useEffect(() => {
+  if (location.state?.activeTab === 'profile') {
+    setActiveTab('profile');
+  }
+}, [location.state]);
 
-  const handleSubmitClaim = async (e) => {
-    e.preventDefault();
-    setMessage('');
-    setSubmitting(true);
-
-    if (!formData.policyId) {
-      setMessage('Please select a policy');
-      setSubmitting(false);
-      return;
-    }
-
-    if (!formData.description.trim()) {
-      setMessage('Please enter a description');
-      setSubmitting(false);
-      return;
-    }
-
-    if (!formData.damagePhoto) {
-      setMessage('Please select a damage photo');
-      setSubmitting(false);
-      return;
-    }
-
-    try {
-      const data = new FormData();
-      data.append('userId', user.id);
-      data.append('policyId', formData.policyId);
-      data.append('description', formData.description);
-      data.append('photo', formData.damagePhoto);
-
-      console.log('FormData contents:');
-      for (let [key, value] of data.entries()) {
-        console.log(key, value);
-      }
-
-      const res = await axios.post('http://localhost:8080/api/claims/submit', data, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-
-      console.log('API Response:', res.data);
-
-      setMessage('✅ Claim submitted successfully! Your claim is now pending review.');
-
-      await fetchDashboardData();
-
-      setFormData({ policyId: '', description: '', damagePhoto: null });
-      
-      const fileInput = document.getElementById('damage-photo-upload');
-      if (fileInput) fileInput.value = '';
-      
-      setTimeout(() => {
-        setShowClaimForm(false);
-        setMessage('');
-        setSubmitting(false);
-      }, 3000);
-
-    } catch (err) {
-      console.error('Full error:', err);
-      console.error('Error response:', err.response?.data);
-      console.error('Error status:', err.response?.status);
-      
-      let errorMessage = 'Failed to submit claim. Please try again.';
-      
-      if (err.response?.data) {
-        errorMessage = err.response.data.message || 
-                      err.response.data.error || 
-                      err.response.data.details ||
-                      JSON.stringify(err.response.data);
-      }
-      
-      setMessage(`❌ Error: ${errorMessage}`);
-      setSubmitting(false);
-    }
-  };
 
   if (!user || !user.id) {
     return (
@@ -152,10 +71,7 @@ export default function UserDashboard() {
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-3">Authentication Required</h1>
           <p className="text-gray-600 mb-6">Please login to access your dashboard.</p>
-          <Link 
-            to="/login" 
-            className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg transition-colors"
-          >
+          <Link to="/login" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg transition-colors">
             Sign In Now
           </Link>
         </div>
@@ -165,28 +81,44 @@ export default function UserDashboard() {
 
   const userStats = {
     totalPolicies: policies.length,
-    activeClaims: claims.filter(c => c.status === 'PENDING').length,
+    processingClaims: claims.filter(c => ['PENDING', 'IN_REVIEW', 'SURVEY_COMPLETED'].includes(c.status)).length,
     approvedClaims: claims.filter(c => c.status === 'APPROVED').length,
     rejectedClaims: claims.filter(c => c.status === 'REJECTED').length
+  };
+
+  const getStatusInfo = (claim) => {
+    switch (claim.status) {
+      case 'APPROVED':
+        return { text: `Approved — ₹${claim.finalApprovedAmount || 0} Paid`, color: 'bg-green-100 text-green-800' };
+      case 'REJECTED':
+        return { text: 'Rejected', color: 'bg-red-100 text-red-800' };
+      case 'SURVEY_COMPLETED':
+        return { text: 'Survey Completed — Awaiting Final Decision', color: 'bg-purple-100 text-purple-800' };
+      case 'IN_REVIEW':
+        return { text: 'Under Survey Review', color: 'bg-blue-100 text-blue-800' };
+      case 'PENDING':
+        return { text: 'Pending Review', color: 'bg-yellow-100 text-yellow-800' };
+      default:
+        return { text: 'Unknown Status', color: 'bg-gray-100 text-gray-800' };
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-0 py-16 mt-4">
+      <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-16 mt-4">
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-10">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {user.firstName}!</h1>
-            <p className="text-gray-600">Manage your insurance claims and policies in one place</p>
+            <p className="text-gray-600">Track your insurance claims and policies</p>
           </div>
           <div className="flex items-center gap-4">
             <button
-              onClick={() => setShowClaimForm(true)}
+              onClick={() => navigate('/user/new-claim')}
               className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all"
             >
-              <PlusCircleIcon className="w-5 h-5" />
               Submit New Claim
             </button>
             <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center text-white font-semibold">
@@ -195,143 +127,107 @@ export default function UserDashboard() {
           </div>
         </div>
 
-        {/* Stats Grid */}
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-center">
+              <ExclamationTriangleIcon className="w-5 h-5 text-red-600 mr-2" />
+              <span className="text-red-800">{error}</span>
+              <button onClick={fetchDashboardData} className="ml-auto text-sm text-red-600 hover:text-red-800 font-medium">
+                Retry
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          <StatCard 
-            title="Total Policies" 
-            value={userStats.totalPolicies} 
-            color="blue"
-            icon={<DocumentTextIcon className="w-6 h-6" />}
-          />
-          <StatCard 
-            title="Pending Claims" 
-            value={userStats.activeClaims} 
-            color="yellow"
-            icon={<ClockIcon className="w-6 h-6" />}
-          />
-          <StatCard 
-            title="Approved Claims" 
-            value={userStats.approvedClaims} 
-            color="emerald"
-            icon={<CheckCircleIcon className="w-6 h-6" />}
-          />
-          <StatCard 
-            title="Rejected Claims" 
-            value={userStats.rejectedClaims} 
-            color="red"
-            icon={<XCircleIcon className="w-6 h-6" />}
-          />
+          <StatCard title="Total Policies" value={userStats.totalPolicies} color="blue" icon={<DocumentTextIcon className="w-6 h-6" />} />
+          <StatCard title="Processing" value={userStats.processingClaims} color="yellow" icon={<ClockIcon className="w-6 h-6" />} />
+          <StatCard title="Approved" value={userStats.approvedClaims} color="green" icon={<CheckCircleIcon className="w-6 h-6" />} />
+          <StatCard title="Rejected" value={userStats.rejectedClaims} color="red" icon={<XCircleIcon className="w-6 h-6" />} />
         </div>
 
         {/* Tabs */}
         <div className="mb-8">
           <div className="border-b border-gray-200">
             <nav className="-mb-px flex space-x-8">
-              <TabButton
-                active={activeTab === 'overview'}
-                onClick={() => setActiveTab('overview')}
-              >
-                Overview
-              </TabButton>
-              <TabButton
-                active={activeTab === 'policies'}
-                onClick={() => setActiveTab('policies')}
-              >
-                My Policies
-              </TabButton>
-              <TabButton
-                active={activeTab === 'claims'}
-                onClick={() => setActiveTab('claims')}
-              >
-                Claim History
-              </TabButton>
+              <TabButton active={activeTab === 'overview'} onClick={() => setActiveTab('overview')}>Overview</TabButton>
+              <TabButton active={activeTab === 'policies'} onClick={() => setActiveTab('policies')}>My Policies</TabButton>
+              <TabButton active={activeTab === 'claims'} onClick={() => setActiveTab('claims')}>Claim History</TabButton>
             </nav>
           </div>
         </div>
 
-        {/* Content based on active tab */}
+        {/* Loading State */}
         {loading ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            <p className="mt-4 text-gray-500">Loading dashboard...</p>
+          <div className="text-center py-20">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent"></div>
+            <p className="mt-6 text-gray-600 text-lg">Loading your dashboard...</p>
           </div>
         ) : (
           <>
             {/* Overview Tab */}
             {activeTab === 'overview' && (
-              <div className="space-y-8">
+              <div className="space-y-10">
                 {/* Recent Claims */}
-                <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
                   <div className="flex items-center justify-between mb-6">
                     <div>
-                      <h2 className="text-xl font-bold text-gray-900">Recent Claims</h2>
-                      <p className="text-gray-600 text-sm mt-1">Latest claim activities</p>
+                      <h2 className="text-2xl font-bold text-gray-900">Recent Claims</h2>
+                      <p className="text-gray-600 mt-1">Your latest claim activity</p>
                     </div>
-                    <button
-                      onClick={() => setActiveTab('claims')}
-                      className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
-                    >
+                    <button onClick={() => setActiveTab('claims')} className="text-blue-600 hover:text-blue-800 font-medium">
                       View all →
                     </button>
                   </div>
+
                   {claims.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                      <div className="text-4xl mb-4">📄</div>
-                      <p>No claims submitted yet</p>
-                      <button
-                        onClick={() => setShowClaimForm(true)}
-                        className="mt-4 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg text-sm"
+                    <div className="text-center py-12">
+                      <DocumentTextIcon className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                      <p className="text-gray-600 mb-6">No claims submitted yet</p>
+                      <button 
+                        onClick={() => navigate('/user/new-claim')}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg"
                       >
-                        <PlusCircleIcon className="w-4 h-4" />
                         Submit Your First Claim
                       </button>
                     </div>
                   ) : (
-                    <div className="space-y-4">
-                      {claims.slice(0, 3).map(claim => (
-                        <ClaimItem key={claim.id} claim={claim} />
-                      ))}
+                    <div className="space-y-6">
+                      {[...claims]
+                        .sort((a, b) => new Date(b.submissionDate) - new Date(a.submissionDate))
+                        .slice(0, 3)
+                        .map(claim => (
+                          <ClaimItem key={claim.id} claim={claim} getStatusInfo={getStatusInfo} />
+                        ))}
                     </div>
                   )}
                 </div>
 
                 {/* Available Policies */}
-                <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6">
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
                   <div className="flex items-center justify-between mb-6">
                     <div>
-                      <h2 className="text-xl font-bold text-gray-900">Available Policies</h2>
-                      <p className="text-gray-600 text-sm mt-1">Insurance plans you can claim</p>
+                      <h2 className="text-2xl font-bold text-gray-900">Your Policies</h2>
+                      <p className="text-gray-600 mt-1">Active insurance coverage</p>
                     </div>
-                    <button
-                      onClick={() => setActiveTab('policies')}
-                      className="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1"
-                    >
+                    <button onClick={() => setActiveTab('policies')} className="text-blue-600 hover:text-blue-800 font-medium">
                       View all →
                     </button>
                   </div>
+
                   {policies.length === 0 ? (
-                    <div className="text-center py-8 text-gray-500">
-                      <div className="text-4xl mb-4">🛡️</div>
-                      <p>No policies available</p>
+                    <div className="text-center py-12">
+                      <ShieldCheckIcon className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                      <p className="text-gray-600">No active policies found</p>
                     </div>
                   ) : (
-                    <>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {policies.slice(0, 3).map(policy => (
-                          <PolicyItem key={policy.id} policy={policy} setShowClaimForm={setShowClaimForm} setFormData={setFormData} />
-                        ))}
-                      </div>
-                      {policies.length > 3 && (
-                        <div className="text-center mt-6">
-                          <button
-                            onClick={() => setActiveTab('policies')}
-                            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                          >
-                            View all policies →
-                          </button>
-                        </div>
-                      )}
-                    </>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                      {policies.slice(0, 3).map(policy => (
+                        <PolicyItem key={policy.id} policy={policy} navigate={navigate} />
+                      ))}
+                    </div>
                   )}
                 </div>
               </div>
@@ -339,63 +235,44 @@ export default function UserDashboard() {
 
             {/* Policies Tab */}
             {activeTab === 'policies' && (
-              <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                <div className="p-6 border-b border-gray-200">
-                  <h2 className="text-xl font-bold text-gray-900">Available Policies</h2>
-                  <p className="text-gray-600 text-sm mt-1">{policies.length} policies available</p>
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+                <div className="p-8 border-b border-gray-200">
+                  <h2 className="text-2xl font-bold text-gray-900">My Policies</h2>
+                  <p className="text-gray-600 mt-2">{policies.length} active policies</p>
                 </div>
                 {policies.length === 0 ? (
-                  <div className="p-12 text-center text-gray-500">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-                      <ShieldCheckIcon className="w-8 h-8 text-gray-400" />
-                    </div>
-                    <p>No policies available</p>
+                  <div className="p-20 text-center text-gray-500">
+                    <ShieldCheckIcon className="w-20 h-20 mx-auto mb-6 text-gray-400" />
+                    <p className="text-xl">No policies available</p>
                   </div>
                 ) : (
                   <div className="divide-y divide-gray-200">
                     {policies.map(policy => (
-                      <div key={policy.id} className="p-6 hover:bg-gray-50 transition-colors">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div key={policy.id} className="p-8 hover:bg-gray-50 transition-colors">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
                           <div className="flex-1">
-                            <div className="flex items-start gap-3">
-                              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <ShieldCheckIcon className="w-5 h-5 text-blue-600" />
+                            <div className="flex items-start gap-6">
+                              <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center">
+                                <ShieldCheckIcon className="w-8 h-8 text-blue-600" />
                               </div>
                               <div>
-                                <h3 className="font-semibold text-gray-900">{policy.name}</h3>
-                                <p className="text-sm text-gray-600 mt-1">{policy.description}</p>
-                                <div className="flex items-center gap-2 mt-3">
-                                  <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">
+                                <h3 className="text-2xl font-bold text-gray-900">{policy.name}</h3>
+                                <p className="text-gray-600 mt-2">{policy.description}</p>
+                                <div className="flex items-center gap-6 mt-6">
+                                  <span className="px-5 py-2 bg-blue-100 text-blue-800 rounded-full font-medium">
                                     {policy.plan}
                                   </span>
-                                  <span className={`px-2 py-1 rounded text-xs font-medium ${
-                                    policy.status === 'active' 
-                                      ? 'bg-emerald-100 text-emerald-800' 
-                                      : 'bg-gray-100 text-gray-800'
-                                  }`}>
-                                    {policy.status}
-                                  </span>
+                                  <span className="text-3xl font-bold text-gray-900">₹{policy.premiumAmount}</span>
                                 </div>
                               </div>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div className="text-2xl font-bold text-gray-900">
-                              ₹{policy.premiumAmount}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                              {policy.plan === 'Monthly' ? 'per month' : 'per year'}
-                            </div>
-                            <button 
-                              onClick={() => {
-                                setFormData({...formData, policyId: policy.id});
-                                setShowClaimForm(true);
-                              }}
-                              className="mt-3 inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 font-medium text-sm"
-                            >
-                              File Claim →
-                            </button>
-                          </div>
+                          <button 
+                            onClick={() => navigate('/user/new-claim', { state: { policy } })}
+                            className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-all shadow-md hover:shadow-lg"
+                          >
+                            File Claim →
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -406,96 +283,55 @@ export default function UserDashboard() {
 
             {/* Claims Tab */}
             {activeTab === 'claims' && (
-              <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-                <div className="p-6 border-b border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h2 className="text-xl font-bold text-gray-900">Claim History</h2>
-                      <p className="text-gray-600 text-sm mt-1">{claims.length} total claims</p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium">
-                        Total: {claims.length}
-                      </span>
-                    </div>
-                  </div>
+              <div className="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
+                <div className="p-8 border-b border-gray-200">
+                  <h2 className="text-2xl font-bold text-gray-900">Claim History</h2>
+                  <p className="text-gray-600 mt-2">{claims.length} total claims</p>
                 </div>
                 {claims.length === 0 ? (
-                  <div className="p-12 text-center text-gray-500">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
-                      <DocumentTextIcon className="w-8 h-8 text-gray-400" />
-                    </div>
-                    <h3 className="text-xl font-bold text-gray-700 mb-2">No Claims Submitted</h3>
-                    <p className="text-gray-500 max-w-md mx-auto mb-6">
-                      You haven't submitted any insurance claims yet. Submit your first claim to get started.
-                    </p>
-                    <button
-                      onClick={() => setShowClaimForm(true)}
-                      className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg"
+                  <div className="p-20 text-center text-gray-500">
+                    <DocumentTextIcon className="w-20 h-20 mx-auto mb-6 text-gray-400" />
+                    <h3 className="text-xl font-bold mb-4">No Claims Yet</h3>
+                    <p className="mb-8">Start by submitting your first claim</p>
+                    <button 
+                      onClick={() => navigate('/user/new-claim')}
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg"
                     >
-                      <PlusCircleIcon className="w-5 h-5" />
-                      Submit Your First Claim
+                      Submit New Claim
                     </button>
                   </div>
                 ) : (
                   <div className="divide-y divide-gray-200">
-                    {claims.map(claim => (
-                      <div key={claim.id} className="p-6 hover:bg-gray-50 transition-colors">
-                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4">
-                          <div>
-                            <div className="flex items-center gap-3 mb-2">
-                              <h3 className="font-semibold text-gray-900">{claim.policy?.name}</h3>
-                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                                claim.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                                claim.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-800' :
-                                'bg-red-100 text-red-800'
-                              }`}>
-                                {claim.status}
-                              </span>
+                    {[...claims]
+                      .sort((a, b) => new Date(b.submissionDate) - new Date(a.submissionDate))
+                      .map(claim => {
+                        const statusInfo = getStatusInfo(claim);
+                        return (
+                          <div key={claim.id} className="p-8 hover:bg-gray-50 transition-colors">
+                            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-6 mb-4">
+                                  <h3 className="text-2xl font-bold text-gray-900">{claim.policy?.name}</h3>
+                                  <span className={`px-6 py-3 rounded-full text-base font-bold ${statusInfo.color}`}>
+                                    {statusInfo.text}
+                                  </span>
+                                </div>
+                                <p className="text-gray-600 mb-4">
+                                  Submitted on {new Date(claim.submissionDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                </p>
+                                <p className="text-gray-700 leading-relaxed">{claim.description}</p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm text-gray-500 mb-2">Claim ID #{claim.id}</p>
+                                <p className="text-3xl font-bold text-gray-900">
+                                  ₹{claim.claimedCoverages?.reduce((sum, c) => sum + parseFloat(c.amount || 0), 0) || 0}
+                                </p>
+                                <p className="text-gray-600">Total Claimed</p>
+                              </div>
                             </div>
-                            <p className="text-sm text-gray-600">
-                              Submitted on {new Date(claim.submissionDate || claim.createdAt).toLocaleDateString('en-US', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                              })}
-                            </p>
                           </div>
-                          <div className="flex items-center gap-3">
-                            <span className="text-sm text-gray-500">Claim ID: {claim.id}</span>
-                          </div>
-                        </div>
-
-                        <p className="text-gray-700 mb-4">{claim.description}</p>
-
-                        {claim.damagePhotoPath && (
-                          <div className="mt-4">
-                            <div className="flex items-center gap-2 text-sm text-gray-700 mb-3">
-                              <PhotoIcon className="w-4 h-4" />
-                              <span className="font-medium">Damage Photo</span>
-                            </div>
-                            <img 
-                              src={`http://localhost:8080${claim.damagePhotoPath}`} 
-                              alt="Damage" 
-                              className="w-full max-w-md rounded-lg border border-gray-300 shadow-sm"
-                              onError={(e) => {
-                                e.target.src = 'https://images.unsplash.com/photo-1589652717521-10c0d092dea9?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80';
-                              }}
-                            />
-                          </div>
-                        )}
-
-                        {claim.surveyReport && (
-                          <div className="mt-4 p-4 bg-blue-50 border border-blue-100 rounded-lg">
-                            <div className="flex items-center gap-2 text-blue-800 font-medium mb-2">
-                              <DocumentTextIcon className="w-4 h-4" />
-                              <span>Survey Report</span>
-                            </div>
-                            <p className="text-sm text-blue-700">{claim.surveyReport}</p>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                        );
+                      })}
                   </div>
                 )}
               </div>
@@ -503,221 +339,20 @@ export default function UserDashboard() {
           </>
         )}
       </div>
-
-      {/* Claim Submission Modal */}
-      {showClaimForm && (
-        <div className="fixed inset-0 z-50">
-          <div 
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-in-out"
-            onClick={() => {
-              if (!submitting) {
-                setShowClaimForm(false);
-                setMessage('');
-                setFormData({ policyId: '', description: '', damagePhoto: null });
-              }
-            }}
-          />
-          
-          <div className="fixed inset-0 flex items-center justify-center p-4">
-            <div 
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform transition-all duration-300 ease-out scale-100 opacity-100"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
-                <h2 className="text-xl font-bold text-gray-900">Submit New Claim</h2>
-                <button
-                  onClick={() => {
-                    if (!submitting) {
-                      setShowClaimForm(false);
-                      setMessage('');
-                      setFormData({ policyId: '', description: '', damagePhoto: null });
-                    }
-                  }}
-                  className="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                  disabled={submitting}
-                >
-                  <XMarkIcon className="w-6 h-6" />
-                </button>
-              </div>
-
-              {message && (
-                <div className={`mx-6 mt-4 p-4 rounded-lg border ${
-                  message.includes('✅') 
-                    ? 'bg-emerald-50 border-emerald-200 text-emerald-800' 
-                    : 'bg-red-50 border-red-200 text-red-800'
-                }`}>
-                  <div className="flex items-center">
-                    {message.includes('✅') ? (
-                      <CheckCircleIcon className="w-5 h-5 mr-2" />
-                    ) : (
-                      <ExclamationTriangleIcon className="w-5 h-5 mr-2" />
-                    )}
-                    <span className="font-medium">{message}</span>
-                  </div>
-                </div>
-              )}
-
-              <form onSubmit={handleSubmitClaim} className="p-6 space-y-6">
-                {/* Policy Selection */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Select Policy <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    required
-                    value={formData.policyId}
-                    onChange={(e) => {
-                      setFormData({...formData, policyId: e.target.value});
-                      setMessage('');
-                    }}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                    disabled={submitting}
-                  >
-                    <option value="">Choose your insurance policy</option>
-                    {policies.map(p => (
-                      <option key={p.id} value={p.id}>
-                        {p.name} - ₹{p.premiumAmount} ({p.plan})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Description */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Damage Description <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    required
-                    rows="4"
-                    value={formData.description}
-                    onChange={(e) => {
-                      setFormData({...formData, description: e.target.value});
-                      setMessage('');
-                    }}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
-                    placeholder="Describe the incident, damage details, and any relevant information..."
-                    disabled={submitting}
-                  />
-                </div>
-
-                {/* File Upload */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Upload Damage Photo <span className="text-red-500">*</span>
-                    <span className="text-xs text-gray-500 ml-2">(Max 5MB)</span>
-                  </label>
-                  <div className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-                    formData.damagePhoto 
-                      ? 'border-emerald-300 bg-emerald-50/50' 
-                      : 'border-gray-300 hover:border-blue-400'
-                  } ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      required
-                      onChange={handleFileChange}
-                      className="hidden"
-                      id="damage-photo-upload"
-                      disabled={submitting}
-                    />
-                    <label 
-                      htmlFor="damage-photo-upload" 
-                      className={`cursor-pointer block ${submitting ? 'cursor-not-allowed' : ''}`}
-                    >
-                      <ArrowUpTrayIcon className="w-8 h-8 text-gray-400 mx-auto mb-3" />
-                      <div className="text-sm text-gray-600 mb-2">
-                        {formData.damagePhoto ? 'Change photo' : 'Click to upload photos of the damage'}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        Supported formats: JPG, PNG, GIF (Max 5MB)
-                      </div>
-                    </label>
-                    {formData.damagePhoto && (
-                      <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
-                              <PhotoIcon className="w-4 h-4 text-emerald-600" />
-                            </div>
-                            <div>
-                              <div className="text-sm font-medium text-gray-900 truncate max-w-xs">
-                                {formData.damagePhoto.name}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                {(formData.damagePhoto.size / 1024 / 1024).toFixed(2)} MB
-                              </div>
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setFormData({...formData, damagePhoto: null});
-                              const fileInput = document.getElementById('damage-photo-upload');
-                              if (fileInput) fileInput.value = '';
-                            }}
-                            className="text-red-600 hover:text-red-800 text-sm font-medium disabled:opacity-50"
-                            disabled={submitting}
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Form Actions */}
-                <div className="flex gap-4 pt-6 border-t border-gray-200">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (!submitting) {
-                        setShowClaimForm(false);
-                        setMessage('');
-                        setFormData({ policyId: '', description: '', damagePhoto: null });
-                      }
-                    }}
-                    className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={submitting}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    disabled={submitting}
-                  >
-                    {submitting ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Submitting...
-                      </>
-                    ) : (
-                      <>
-                        <PlusCircleIcon className="w-5 h-5" />
-                        Submit Claim
-                      </>
-                    )}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
+
+// === Helper Components (Now defined inside the file) ===
 
 function TabButton({ active, onClick, children }) {
   return (
     <button
       onClick={onClick}
-      className={`py-3 px-1 border-b-2 font-medium text-sm transition-colors ${
+      className={`py-4 px-8 text-lg font-medium transition-all border-b-4 ${
         active
-          ? 'border-blue-500 text-blue-600'
-          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+          ? 'border-blue-600 text-blue-600'
+          : 'border-transparent text-gray-600 hover:text-gray-900'
       }`}
     >
       {children}
@@ -726,88 +361,72 @@ function TabButton({ active, onClick, children }) {
 }
 
 function StatCard({ title, value, color, icon }) {
-  const colorClasses = {
-    blue: 'bg-blue-50 border-blue-100',
-    yellow: 'bg-yellow-50 border-yellow-100',
-    emerald: 'bg-emerald-50 border-emerald-100',
-    red: 'bg-red-50 border-red-100'
-  };
-
-  const iconColorClasses = {
-    blue: 'bg-blue-100 text-blue-600',
-    yellow: 'bg-yellow-100 text-yellow-600',
-    emerald: 'bg-emerald-100 text-emerald-600',
-    red: 'bg-red-100 text-red-600'
+  const colors = {
+    blue: 'bg-blue-100 text-blue-700 border-blue-200',
+    yellow: 'bg-yellow-100 text-yellow-700 border-yellow-200',
+    green: 'bg-green-100 text-green-700 border-green-200',
+    red: 'bg-red-100 text-red-700 border-red-200'
   };
 
   return (
-    <div className={`rounded-xl border p-6 ${colorClasses[color]}`}>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-2xl font-bold text-gray-900">{value}</p>
-          <p className="text-sm text-gray-600 mt-1">{title}</p>
-        </div>
-        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${iconColorClasses[color]}`}>
+    <div className={`p-8 rounded-3xl shadow-xl border-2 ${colors[color]} bg-white`}>
+      <div className="flex items-center justify-between mb-6">
+        <div className="p-4 bg-white rounded-2xl shadow-md">
           {icon}
         </div>
+        <p className="text-5xl font-bold">{value}</p>
       </div>
+      <p className="text-xl font-semibold">{title}</p>
     </div>
   );
 }
 
-function ClaimItem({ claim }) {
-  const statusColors = {
-    PENDING: 'bg-yellow-100 text-yellow-800',
-    APPROVED: 'bg-emerald-100 text-emerald-800',
-    REJECTED: 'bg-red-100 text-red-800'
-  };
+function ClaimItem({ claim, getStatusInfo }) {
+  const statusInfo = getStatusInfo(claim);
 
   return (
-    <div className="bg-gray-50 rounded-lg border border-gray-200 hover:border-blue-300 transition-colors p-4">
-      <div className="flex items-start justify-between">
+    <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-8 border border-gray-300 hover:shadow-xl transition-all">
+      <div className="flex flex-col lg:flex-row justify-between items-start gap-8">
         <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <div className={`px-3 py-1 rounded-full text-xs font-medium ${statusColors[claim.status]}`}>
-              {claim.status}
-            </div>
-            <div className="text-sm text-gray-500">
-              {new Date(claim.submissionDate || claim.createdAt).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-              })}
-            </div>
+          <div className="flex items-center gap-6 mb-4">
+            <h3 className="text-2xl font-bold text-gray-900">{claim.policy?.name || 'Unknown Policy'}</h3>
+            <span className={`px-6 py-3 rounded-full text-base font-bold ${statusInfo.color}`}>
+              {statusInfo.text}
+            </span>
           </div>
-          <h3 className="font-semibold text-gray-900">{claim.policy?.name || 'Unknown Policy'}</h3>
-          <p className="text-sm text-gray-600 mt-2 line-clamp-2">{claim.description}</p>
+          <p className="text-gray-700 mb-4 leading-relaxed">{claim.description}</p>
+          <p className="text-sm text-gray-500">
+            Submitted: {new Date(claim.submissionDate).toLocaleDateString()}
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-4xl font-bold text-gray-900">
+            ₹{claim.claimedCoverages?.reduce((sum, c) => sum + parseFloat(c.amount || 0), 0) || 0}
+          </p>
+          <p className="text-gray-600">Claimed Amount</p>
         </div>
       </div>
     </div>
   );
 }
 
-function PolicyItem({ policy, setShowClaimForm, setFormData }) {
+function PolicyItem({ policy, navigate }) {
   return (
-    <div className="bg-gray-50 border border-gray-200 rounded-lg p-5 hover:border-blue-300 hover:shadow-md transition-all duration-200">
-      <div className="flex items-start justify-between mb-4">
+    <div className="bg-white rounded-3xl shadow-xl border border-gray-200 p-8 hover:shadow-2xl transition-all">
+      <div className="flex items-start justify-between mb-8">
         <div>
-          <h3 className="font-semibold text-gray-900 line-clamp-1">{policy.name}</h3>
-          <p className="text-sm text-gray-600 mt-1 line-clamp-2">{policy.description}</p>
+          <h3 className="text-2xl font-bold text-gray-900">{policy.name}</h3>
+          <p className="text-gray-600 mt-3 max-w-md">{policy.description}</p>
         </div>
-        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium whitespace-nowrap">
+        <span className="px-6 py-3 bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 rounded-full font-bold">
           {policy.plan}
         </span>
       </div>
       <div className="flex items-center justify-between">
-        <div className="text-lg font-bold text-gray-900">
-          ₹{policy.premiumAmount}
-        </div>
+        <div className="text-4xl font-bold text-gray-900">₹{policy.premiumAmount}</div>
         <button 
-          onClick={() => {
-            setFormData({policyId: policy.id, description: '', damagePhoto: null});
-            setShowClaimForm(true);
-          }}
-          className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+          onClick={() => navigate('/user/new-claim', { state: { policy } })}
+          className="px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all"
         >
           File Claim →
         </button>
@@ -815,4 +434,3 @@ function PolicyItem({ policy, setShowClaimForm, setFormData }) {
     </div>
   );
 }
-

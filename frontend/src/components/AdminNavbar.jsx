@@ -27,9 +27,10 @@ export default function AdminNavbar() {
 
           {/* Navigation Links */}
           <div className="hidden md:flex items-center space-x-1">
+            <NavLink to="/admin/panel" icon="📊">Dashboard</NavLink>
             <NavLink to="/admin/add-policy" icon="📋">Add Policy</NavLink>
             <NavLink to="/admin/policies" icon="📄">Policies</NavLink>
-            <NavLink to="/admin/applications" icon="📝">Applications</NavLink>
+            <NavLink to="/admin/Coverages" icon="📝">Coverages</NavLink>
             <NavLink to="/admin/claims" icon="⚡">Claims</NavLink>
             <NavLink to="/admin/register-admin" icon="👨‍💼">Admin</NavLink>
             <NavLink to="/admin/register-surveyor" icon="🔍">Surveyor</NavLink>

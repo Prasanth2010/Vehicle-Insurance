@@ -36,4 +36,9 @@ public class User {
     
     @Column(nullable = false)
     private String role;  // USER, ADMIN, SURVEYOR
+
+    private String status; // "active" or "inactive"
+
+public String getStatus() { return status; }
+public void setStatus(String status) { this.status = status; }
 }

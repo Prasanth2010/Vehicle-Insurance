@@ -74,7 +74,7 @@ Login URL: /surveyor/login`);
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="text-center mb-10">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-orange-600 to-amber-500 rounded-2xl mb-6">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-600 to-amber-500 rounded-2xl mb-6">
               <FaUserTie className="text-3xl text-white" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-3">
@@ -381,7 +381,7 @@ Login URL: /surveyor/login`);
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 bg-gradient-to-r from-orange-600 to-amber-500 text-white px-8 py-3 rounded-lg font-semibold hover:shadow-lg hover:scale-[1.02] transition-all duration-200 focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50"
+                    className="flex-1 btn-primary py-3 disabled:opacity-50"
                   >
                     {loading ? (
                       <span className="flex items-center justify-center">
@@ -392,7 +392,7 @@ Login URL: /surveyor/login`);
                         Creating Surveyor Account...
                       </span>
                     ) : (
-                      <span className="flex items-center justify-center btn-secondary">
+                      <span className="flex items-center justify-center">
                         <FaUserTie className="mr-2" />
                         Create Surveyor Account
                       </span>

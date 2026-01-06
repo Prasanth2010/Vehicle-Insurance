@@ -223,28 +223,6 @@ export default function AddCoverage() {
           </form>
         </div>
 
-        {/* Information Card */}
-        {/* <div className="mt-8 bg-blue-50 border border-blue-100 rounded-xl p-6">
-          <h3 className="text-lg font-semibold text-blue-900 mb-3 flex items-center gap-2">
-            <ShieldCheckIcon className="w-5 h-5" />
-            About Coverage Types
-          </h3>
-          <ul className="space-y-2 text-sm text-blue-800">
-            <li className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5"></div>
-              <span><strong>Collision Coverage:</strong> Covers damage to your vehicle from accidents</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5"></div>
-              <span><strong>Comprehensive Coverage:</strong> Protects against theft, vandalism, and natural disasters</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5"></div>
-              <span><strong>Liability Coverage:</strong> Covers injuries and property damage to others</span>
-            </li>
-          </ul>
-        </div> */}
-
         {/* Quick Stats */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="bg-white p-4 rounded-lg border border-gray-200 text-center">
@@ -267,69 +245,3 @@ export default function AddCoverage() {
   );
 }
 
-
-// import { useState } from 'react';
-// import { useParams } from 'react-router-dom';
-// import axios from 'axios';
-// import AdminNavbar from '../components/AdminNavbar';
-
-// export default function AddCoverage() {
-//   const { policyId } = useParams();
-//   const [coverage, setCoverage] = useState({ type: '', description: '', amount: '' });
-//   const [message, setMessage] = useState('');
-
-//   const types = ['Collision', 'Comprehensive', 'Liability', 'Uninsured Motorist', 'Medical Payment', 'Roadside Assistance', 'Rental Reimbursement', 'Gap Insurance'];
-
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     try {
-//       await axios.post(`http://localhost:8080/api/policies/${policyId}/coverages`, coverage);
-//       setMessage('Coverage added successfully!');
-//       setCoverage({ type: '', description: '', amount: '' });
-//     } catch (err) {
-//       setMessage('Error adding coverage');
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen bg-black text-white">
-//       <AdminNavbar />
-//       <div className="max-w-4xl mx-auto px-8 py-20">
-//         <h1 className="text-6xl font-bold text-lime-400 text-center mb-16">Add Coverage to Policy ID: {policyId}</h1>
-//         {message && <p className="text-center text-2xl text-lime-400 mb-8">{message}</p>}
-//         <form onSubmit={handleSubmit} className="space-y-12">
-//           <select
-//             value={coverage.type}
-//             onChange={(e) => setCoverage({...coverage, type: e.target.value})}
-//             required
-//             className="w-full p-6 text-xl bg-gray-900 border-4 border-lime-400 rounded-xl"
-//           >
-//             <option value="">Select Coverage Type</option>
-//             {types.map(t => <option key={t} value={t}>{t}</option>)}
-//           </select>
-//           <textarea
-//             placeholder="Description"
-//             value={coverage.description}
-//             onChange={(e) => setCoverage({...coverage, description: e.target.value})}
-//             required
-//             rows="4"
-//             className="w-full p-6 text-xl bg-gray-900 border-4 border-lime-400 rounded-xl"
-//           />
-//           <input
-//             placeholder="Coverage Amount"
-//             type="number"
-//             value={coverage.amount}
-//             onChange={(e) => setCoverage({...coverage, amount: e.target.value})}
-//             required
-//             className="w-full p-6 text-xl bg-gray-900 border-4 border-lime-400 rounded-xl"
-//           />
-//           <div className="text-center">
-//             <button type="submit" className="px-20 py-6 bg-lime-400 text-black text-3xl font-bold rounded-2xl hover:bg-lime-300">
-//               Add Coverage
-//             </button>
-//           </div>
-//         </form>
-//       </div>
-//     </div>
-//   );
-// }

@@ -62,22 +62,25 @@ useEffect(() => {
 }, [location.state]);
 
 
-  if (!user || !user.id) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="text-center max-w-md">
-          <div className="w-20 h-20 mx-auto mb-6 bg-blue-100 rounded-full flex items-center justify-center">
-            <UserCircleIcon className="w-12 h-12 text-blue-600" />
+   if (!user.id || user.role !== 'USER') {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center p-4">
+          <div className="text-center max-w-md">
+            <div className="w-20 h-20 mx-auto mb-6 bg-red-100 rounded-full flex items-center justify-center">
+              <XCircleIcon className="w-12 h-12 text-red-600" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-3">Access Denied</h1>
+            <p className="text-gray-600 mb-6">Customer credentials required to access this panel.</p>
+            <Link 
+              to="/login"
+              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg transition-colors"
+            >
+              Go to Customer Login
+            </Link>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-3">Authentication Required</h1>
-          <p className="text-gray-600 mb-6">Please login to access your dashboard.</p>
-          <Link to="/login" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-6 rounded-lg transition-colors">
-            Sign In Now
-          </Link>
         </div>
-      </div>
-    );
-  }
+      );
+    }
 
   const userStats = {
     totalPolicies: policies.length,

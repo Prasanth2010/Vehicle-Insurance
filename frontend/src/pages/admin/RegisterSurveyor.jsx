@@ -19,52 +19,30 @@ export default function RegisterSurveyor() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [messageType, setMessageType] = useState('');
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMessage('');
-    setError('');
-    setLoading(true);
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setMessage('');
+  setMessageType('');
 
-    const surveyorData = {
-      ...formData,
-      role: 'SURVEYOR'
-    };
-
-    try {
-      const res = await axios.post('http://localhost:8080/admin/add-user', surveyorData);
-      setMessage(`✅ New Surveyor Account Created Successfully!
-
-👤 Name: ${surveyorData.firstName} ${surveyorData.lastName}
-📧 Email: ${surveyorData.email}
-🔐 Password: ${surveyorData.password}
-
-Share these credentials with the surveyor.
-Login URL: /surveyor/login`);
-
-      // Reset form
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        password: '',
-        contactNo: '',
-        age: '',
-        gender: 'Male',
-        street: '',
-        city: '',
-        pincode: ''
-      });
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create surveyor account. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    await axios.post('http://localhost:8080/admin/register-surveyor', formData);
+    setMessage('Surveyor account created successfully!');
+    setMessageType('success');
+    // Clear form or redirect
+  } catch (err) {
+    setMessage(err.response?.data?.message || 'Failed to create surveyor account');
+    setMessageType('error');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50">

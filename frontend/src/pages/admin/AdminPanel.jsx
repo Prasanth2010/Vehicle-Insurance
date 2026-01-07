@@ -28,13 +28,15 @@ export default function AdminPanel() {
     policies: 0, 
     applications: 0 
   });
+  const [systemStatus, setSystemStatus] = useState('Checking...');
+  const [statusColor, setStatusColor] = useState('text-gray-600');
   const [loading, setLoading] = useState(true);
   const [recentActivities, setRecentActivities] = useState([]);
-  const [systemStatus, setSystemStatus] = useState({
-    api: true,
-    database: true,
-    uptime: '99.9%'
-  });
+  // const [systemStatus, setSystemStatus] = useState({
+  //   api: true,
+  //   database: true,
+  //   uptime: '99.9%'
+  // });
 
   useEffect(() => {
     fetchStats();
@@ -142,15 +144,31 @@ export default function AdminPanel() {
     if (diffDays < 7) return `${diffDays} days ago`;
     return past.toLocaleDateString();
   };
-
-  const fetchSystemStatus = async () => {
-    try {
-      await axios.get('http://localhost:8080/health');
-      setSystemStatus(prev => ({ ...prev, api: true }));
-    } catch {
-      setSystemStatus(prev => ({ ...prev, api: false }));
+const fetchSystemStatus = async () => {
+  try {
+    const res = await axios.get('http://localhost:8080/actuator/health');
+    
+    if (res.data.status === 'UP') {
+      setSystemStatus('Online');
+      setStatusColor('text-Green-600');
+    } else {
+      setSystemStatus('Down');
+      setStatusColor('text-red-600');
     }
-  };
+  } catch (err) {
+    console.error('Health check failed:', err);
+    setSystemStatus('Offline');
+    setStatusColor('text-red-600');
+  }
+};
+  // const fetchSystemStatus = async () => {
+  //   try {
+  //     await axios.get('http://localhost:8080/health');
+  //     setSystemStatus(prev => ({ ...prev, api: true }));
+  //   } catch {
+  //     setSystemStatus(prev => ({ ...prev, api: false }));
+  //   }
+  // };
 
   const refreshData = () => {
     setLoading(true);
@@ -396,7 +414,18 @@ export default function AdminPanel() {
             {/* System Status */}
             <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
               <h2 className="text-xl font-bold text-gray-900 mb-8">System Status</h2>
+              {/* <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 rounded-full bg-current" />
+                  <span className={`font-semibold ${statusColor}`}>
+                    System: {systemStatus}
+                  </span>
+                </div> */}
               <div className="space-y-4">
+                <StatusItem 
+                  title="System:" 
+                  status={systemStatus} 
+                  isHealthy={true}
+                />
                 <StatusItem 
                   title="API Server" 
                   status={systemStatus.api ? 'Operational' : 'Degraded'} 
@@ -407,12 +436,7 @@ export default function AdminPanel() {
                   status="Connected" 
                   isHealthy={true}
                 />
-                <StatusItem 
-                  title="Uptime" 
-                  status={systemStatus.uptime} 
-                  isHealthy={true}
-                  showIcon={false}
-                />
+                
               </div>
             </div>
 
@@ -573,12 +597,12 @@ function StatusItem({ title, status, isHealthy, showIcon = true }) {
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
         {showIcon && (
-          <div className={`w-3 h-3 rounded-full ${isHealthy ? 'bg-emerald-500' : 'bg-red-500'}`}></div>
+          <div className={`w-3 h-3 rounded-full ${isHealthy ? 'bg-green-500' : 'bg-red-500'}`}></div>
         )}
-        <span className="text-sm font-medium text-gray-700">{title}</span>
+        <span className="text-sm font-medium text-black-700">{title}</span>
       </div>
       <span className={`text-sm font-semibold ${
-        isHealthy ? 'text-emerald-600' : 'text-red-600'
+        isHealthy ? 'text-green-600' : 'text-red-600'
       }`}>
         {status}
       </span>

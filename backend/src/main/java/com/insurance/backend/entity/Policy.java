@@ -54,7 +54,7 @@ public class Policy {
     @Column(name = "premium_amount") // Explicit column mapping
     private double premiumAmount;
 
-    private String status;
-
+    @Column(name = "status", nullable = false)
+    private String status = "active";
     
 }

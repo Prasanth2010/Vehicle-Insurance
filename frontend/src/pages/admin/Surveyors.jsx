@@ -224,14 +224,14 @@ export default function Surveyors() {
                     <div className="flex gap-3 pt-4">
                       <button
                         onClick={saveEdit}
-                        className="flex-1 flex items-center justify-center gap-2 bg-emerald-600 text-white py-2.5 rounded-lg hover:bg-emerald-700 font-medium"
+                        className="flex-1 flex items-center justify-center gap-2 bg-green-600 text-white py-2.5 rounded-lg hover:bg-green-700 font-medium"
                       >
                         <FaSave />
                         Save
                       </button>
                       <button
                         onClick={cancelEdit}
-                        className="flex-1 flex items-center justify-center gap-2 bg-gray-200 text-gray-700 py-2.5 rounded-lg hover:bg-gray-300 font-medium"
+                        className="flex-1 flex items-center justify-center gap-2 bg-red-600 text-white py-2.5 rounded-lg hover:bg-red-700 font-medium"
                       >
                         <FaTimes />
                         Cancel

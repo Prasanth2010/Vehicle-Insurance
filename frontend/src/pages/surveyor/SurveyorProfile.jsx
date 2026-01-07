@@ -39,39 +39,38 @@ export default function SurveyorProfile() {
     }
 
     const fetchSurveyorProfile = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(`http://localhost:8080/admin/users/${user.id}`);
+  try {
+    setLoading(true);
+    const response = await axios.get('http://localhost:8080/api/profile/me');
 
-        const freshUser = response.data;
+    const freshUser = response.data;
 
-        setProfileData({
-          firstName: freshUser.firstName || '',
-          lastName: freshUser.lastName || '',
-          email: freshUser.email || '',
-          contactNo: freshUser.contactNo || '',
-          street: freshUser.street || '',
-          city: freshUser.city || '',
-          pincode: freshUser.pincode || ''
-        });
-      } catch (err) {
-        console.error('Failed to fetch surveyor profile:', err);
-        setMessage('Failed to load profile data from server.');
-
-        // Fallback to localStorage
-        setProfileData({
-          firstName: user.firstName || '',
-          lastName: user.lastName || '',
-          email: user.email || '',
-          contactNo: user.contactNo || '',
-          street: user.street || '',
-          city: user.city || '',
-          pincode: user.pincode || ''
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+    setProfileData({
+      firstName: freshUser.firstName || '',
+      lastName: freshUser.lastName || '',
+      email: freshUser.email || '',
+      contactNo: freshUser.contactNo || '',
+      street: freshUser.street || '',
+      city: freshUser.city || '',
+      pincode: freshUser.pincode || ''
+    });
+  } catch (err) {
+    console.error('Failed to fetch profile:', err);
+    setMessage('Failed to load profile data');
+    // Fallback to localStorage
+    setProfileData({
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      email: user.email || '',
+      contactNo: user.contactNo || '',
+      street: user.street || '',
+      city: user.city || '',
+      pincode: user.pincode || ''
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
     fetchSurveyorProfile();
   }, [user?.id, navigate]);
@@ -81,7 +80,7 @@ export default function SurveyorProfile() {
     setSaving(true);
 
     try {
-      await axios.put(`http://localhost:8080/admin/users/${user.id}`, profileData);
+      await axios.put('http://localhost:8080/api/profile/me', profileData);
 
       // Update localStorage
       const updatedUser = { ...user, ...profileData };

@@ -34,64 +34,61 @@ export default function Profile() {
     }
 
     const fetchProfile = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get(`http://localhost:8080/admin/users/${user.id}`);
+  try {
+    setLoading(true);
+    const response = await axios.get('http://localhost:8080/api/profile/me');
 
-        const freshUser = response.data;
+    const freshUser = response.data;
 
-        setProfileData({
-          firstName: freshUser.firstName || '',
-          lastName: freshUser.lastName || '',
-          email: freshUser.email || '',
-          contactNo: freshUser.contactNo || '',
-          street: freshUser.street || '',
-          city: freshUser.city || '',
-          pincode: freshUser.pincode || ''
-        });
-      } catch (err) {
-        console.error('Failed to fetch profile:', err);
-        setMessage('Failed to load profile data from server.');
-
-        // Fallback to localStorage
-        setProfileData({
-          firstName: user.firstName || '',
-          lastName: user.lastName || '',
-          email: user.email || '',
-          contactNo: user.contactNo || '',
-          street: user.street || '',
-          city: user.city || '',
-          pincode: user.pincode || ''
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+    setProfileData({
+      firstName: freshUser.firstName || '',
+      lastName: freshUser.lastName || '',
+      email: freshUser.email || '',
+      contactNo: freshUser.contactNo || '',
+      street: freshUser.street || '',
+      city: freshUser.city || '',
+      pincode: freshUser.pincode || ''
+    });
+  } catch (err) {
+    console.error('Failed to fetch profile:', err);
+    setMessage('Failed to load profile data');
+    // Fallback to localStorage
+    setProfileData({
+      firstName: user.firstName || '',
+      lastName: user.lastName || '',
+      email: user.email || '',
+      contactNo: user.contactNo || '',
+      street: user.street || '',
+      city: user.city || '',
+      pincode: user.pincode || ''
+    });
+  } finally {
+    setLoading(false);
+  }
+};
 
     fetchProfile();
   }, [user?.id, navigate]);
 
   const handleSave = async () => {
-    setMessage('');
-    setSaving(true);
+  setMessage('');
+  setSaving(true);
 
-    try {
-      await axios.put(`http://localhost:8080/admin/users/${user.id}`, profileData);
+  try {
+    await axios.put('http://localhost:8080/api/profile/me', profileData);
 
-      // Update localStorage
-      const updatedUser = { ...user, ...profileData };
-      localStorage.setItem('user', JSON.stringify(updatedUser));
+    const updatedUser = { ...user, ...profileData };
+    localStorage.setItem('user', JSON.stringify(updatedUser));
 
-      setMessage('✅ Profile updated successfully!');
-      setIsEditing(false);
-
-      setTimeout(() => setMessage(''), 5000);
-    } catch (err) {
-      setMessage(`❌ Failed to update: ${err.response?.data?.message || err.message}`);
-    } finally {
-      setSaving(false);
-    }
-  };
+    setMessage('✅ Profile updated successfully!');
+    setIsEditing(false);
+    setTimeout(() => setMessage(''), 5000);
+  } catch (err) {
+    setMessage(`❌ Failed to update: ${err.response?.data?.message || err.message}`);
+  } finally {
+    setSaving(false);
+  }
+};
 
   const goToDashboard = () => {
     navigate('/user/dashboard');

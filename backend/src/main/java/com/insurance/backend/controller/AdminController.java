@@ -9,6 +9,7 @@ import com.insurance.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -236,50 +237,9 @@ public ResponseEntity<Map<String, String>> deleteClaim(@PathVariable Long claimI
         response.put("surveyor", surveyorOpt.get());
         return ResponseEntity.ok(response);
     }
-
-    // Final decision on claim
-    // @PostMapping("/claims/{claimId}/final-decision")
-    // public ResponseEntity<Map<String, String>> finalDecision(
-    //         @PathVariable Long claimId,
-    //         @RequestBody Map<String, Object> body) {
-
-    //     Map<String, String> response = new HashMap<>();
-
-    //     Optional<Claim> claimOpt = claimRepository.findById(claimId);
-    //     if (claimOpt.isEmpty()) {
-    //         response.put("message", "Claim not found");
-    //         return ResponseEntity.notFound().build();
-    //     }
-
-    //     Claim claim = claimOpt.get();
-    //     String finalStatus = (String) body.get("finalStatus");
-
-    //     if (!"APPROVED".equals(finalStatus) && !"REJECTED".equals(finalStatus)) {
-    //         response.put("message", "Invalid status. Must be APPROVED or REJECTED");
-    //         return ResponseEntity.badRequest().body(response);
-    //     }
-
-    //     Double amount = 0.0;
-    //     if (body.get("finalApprovedAmount") != null) {
-    //         try {
-    //             amount = Double.valueOf(body.get("finalApprovedAmount").toString());
-    //         } catch (NumberFormatException e) {
-    //             response.put("message", "Invalid amount format");
-    //             return ResponseEntity.badRequest().body(response);
-    //         }
-    //     }
-
-    //     claim.setStatus(finalStatus);
-    //     claim.setFinalApprovedAmount(amount);
-    //     claimRepository.save(claim);
-
-    //     response.put("message", "Final decision processed: " + finalStatus);
-    //     return ResponseEntity.ok(response);
-    // }
-
-    // Add policy
     @PostMapping("/policies")
     public ResponseEntity<Policy> addPolicy(@RequestBody Policy policy) {
+        policy.setStatus("active");
         return ResponseEntity.ok(policyRepository.save(policy));
     }
     // In AdminController.java
@@ -332,4 +292,80 @@ public ResponseEntity<User> getUserById(@PathVariable Long id) {
     return ResponseEntity.ok(userOpt.get());
 }
 
+// Create new Surveyor (only Admin can call)
+@PostMapping("/register-surveyor")
+public ResponseEntity<Map<String, String>> registerSurveyor(@RequestBody User surveyor) {
+    Map<String, String> response = new HashMap<>();
+
+    if (surveyor.getEmail() == null || surveyor.getPassword() == null || surveyor.getFirstName() == null) {
+        response.put("message", "Required fields missing");
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    if (userRepository.existsByEmail(surveyor.getEmail())) {
+        response.put("message", "Email already registered");
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    surveyor.setRole("SURVEYOR");
+    surveyor.setStatus("active");
+    userRepository.save(surveyor);
+
+    response.put("message", "Surveyor created successfully");
+    return ResponseEntity.ok(response);
+}
+
+// Create new Admin (only existing Admin can call)
+@PostMapping("/register-admin")
+public ResponseEntity<Map<String, String>> registerAdmin(@RequestBody User admin) {
+    Map<String, String> response = new HashMap<>();
+
+    if (admin.getEmail() == null || admin.getPassword() == null || admin.getFirstName() == null) {
+        response.put("message", "Required fields missing");
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    if (userRepository.existsByEmail(admin.getEmail())) {
+        response.put("message", "Email already registered");
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    admin.setRole("ADMIN"); 
+    admin.setStatus("active");
+    userRepository.save(admin);
+
+    response.put("message", "Admin created successfully");
+    return ResponseEntity.ok(response);
+}   
+
+@PutMapping("/users/me")
+public ResponseEntity<Map<String, String>> updateMyProfile(
+    Authentication authentication,
+    @RequestBody User updatedData) {
+
+    Map<String, String> response = new HashMap<>();
+
+    String email = authentication.getName();
+    Optional<User> userOpt = userRepository.findByEmail(email);
+
+    if (userOpt.isEmpty()) {
+        response.put("message", "User not found");
+        return ResponseEntity.notFound().build();
+    }
+
+    User user = userOpt.get();
+
+    // Update allowed fields
+    if (updatedData.getFirstName() != null) user.setFirstName(updatedData.getFirstName());
+    if (updatedData.getLastName() != null) user.setLastName(updatedData.getLastName());
+    if (updatedData.getContactNo() != null) user.setContactNo(updatedData.getContactNo());
+    if (updatedData.getStreet() != null) user.setStreet(updatedData.getStreet());
+    if (updatedData.getCity() != null) user.setCity(updatedData.getCity());
+    if (updatedData.getPincode() != null) user.setPincode(updatedData.getPincode());
+
+    userRepository.save(user);
+
+    response.put("message", "Profile updated successfully");
+    return ResponseEntity.ok(response);
+}
 }

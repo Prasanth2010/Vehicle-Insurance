@@ -25,6 +25,7 @@ export default function SurveyorNavbar() {
 
   const handleLogout = () => {
     localStorage.removeItem('user');
+    localStorage.removeItem('token');
     navigate('/surveyor/login');
   };
 
@@ -46,13 +47,18 @@ export default function SurveyorNavbar() {
           {/* Logo & Brand */}
           <div className="flex items-center">
             <button onClick={gotoPanel} className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
+              {/* <div className="w-10 h-10 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-md">
                 <ClipboardDocumentCheckIcon className="w-6 h-6 text-white" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-gray-900">InsurePro</h1>
                 <p className="text-xs text-gray-500">Surveyor Portal</p>
-              </div>
+              </div> */}
+              <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-emerald-500 rounded-xl flex items-center justify-center shadow-md">
+              <span className="text-white font-bold text-xl">I</span>
+            </div>
+            <span className="text-2xl font-bold text-gray-900">InsurePro</span>
+            <p className="text-xs text-gray-500">Surveyor Portal</p>
             </button>
           </div>
 

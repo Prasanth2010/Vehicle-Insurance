@@ -19,51 +19,29 @@ export default function RegisterAdmin() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [messageType, setMessageType] = useState(''); // 'success' or 'error'
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMessage('');
-    setError('');
-    setLoading(true);
+  e.preventDefault();
+  setLoading(true);
+  setMessage('');
+  setMessageType('');
 
-    const adminData = {
-      ...formData,
-      role: 'ADMIN'
-    };
-
-    try {
-      await axios.post('http://localhost:8080/admin/add-user', adminData);
-      setMessage(`✅ New Admin Account Created Successfully!
-
-📧 Email: ${adminData.email}
-🔐 Password: ${adminData.password}
-
-Share these credentials with the new administrator.
-Login URL: /admin/login`);
-      
-      // Reset form
-      setFormData({
-        firstName: '',
-        lastName: '',
-        email: '',
-        password: '',
-        contactNo: '',
-        age: '',
-        gender: 'Male',
-        street: '',
-        city: '',
-        pincode: ''
-      });
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to create admin account. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  try {
+    await axios.post('http://localhost:8080/admin/register-admin', formData);
+    setMessage('Admin account created successfully!');
+    setMessageType('success');
+  } catch (err) {
+    setMessage(err.response?.data?.message || 'Failed to create admin account');
+    setMessageType('error');
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gray-50">

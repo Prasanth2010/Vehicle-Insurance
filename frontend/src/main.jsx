@@ -9,7 +9,7 @@ import axios from 'axios';
 const token = localStorage.getItem('token');
 if (token) {
   axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-  console.log(`Bearer ${token}`);
+  //console.log(`Bearer ${token}`);
 }
 createRoot(document.getElementById('root')).render(
   <StrictMode>

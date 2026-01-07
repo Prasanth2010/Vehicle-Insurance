@@ -9,6 +9,7 @@ export default function AdminLogin() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -21,7 +22,7 @@ export default function AdminLogin() {
     setError('');
 
     try {
-      const res = await axios.post('http://localhost:8080/auth/login', formData);
+      const res = await axios.post(`${API_BASE_URL}/auth/login`, formData);
 
       const { token, user } = res.data;
 

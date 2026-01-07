@@ -22,6 +22,7 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState(''); // 'success' or 'error'
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -54,7 +55,7 @@ export default function Register() {
     setMessage('');
 
     try {
-      await axios.post('http://localhost:8080/auth/register', formData);
+      await axios.post(`${API_BASE_URL}/auth/register`, formData);
 
       setMessage('Account created successfully! Redirecting to login...');
       setMessageType('success');

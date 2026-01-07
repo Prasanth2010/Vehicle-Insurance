@@ -15,12 +15,13 @@ export default function Home() {
     satisfaction: 99,
     claimsProcessed: 5000
   });
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const storedUser = localStorage.getItem('user');
   const user = storedUser ? JSON.parse(storedUser) : null;
 
   useEffect(() => {
-    axios.get('http://localhost:8080/api/policies')
+    axios.get(`${API_BASE_URL}/api/policies`)
       .then(res => {
         setPolicies(res.data.slice(0, 3));
         setLoading(false);

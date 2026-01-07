@@ -24,6 +24,8 @@ export default function NewClaim() {
   });
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 
   useEffect(() => {
     fetchPolicies();
@@ -34,7 +36,7 @@ export default function NewClaim() {
 
   const fetchPolicies = async () => {
     try {
-      const res = await axios.get('http://localhost:8080/api/policies');
+      const res = await axios.get(`${API_BASE_URL}/api/policies`);
       setPolicies(res.data);
     } catch (err) {
       setMessage('Failed to load policies');
@@ -47,7 +49,7 @@ export default function NewClaim() {
       return;
     }
     try {
-      const res = await axios.get(`http://localhost:8080/api/policies/${policyId}/coverages`);
+      const res = await axios.get(`${API_BASE_URL}/api/policies/${policyId}/coverages`);
       setAvailableCoverages(res.data);
     } catch (err) {
       setAvailableCoverages([]);
@@ -84,7 +86,7 @@ export default function NewClaim() {
       data.append('description', formData.description);
       data.append('photo', formData.damagePhoto);
 
-      await axios.post('http://localhost:8080/api/claims/submit-with-coverage', data);
+      await axios.post(`${API_BASE_URL}/api/claims/submit-with-coverage`, data);
 
       setMessage('Claim submitted successfully!');
       setTimeout(() => navigate('/user/dashboard'), 2000);

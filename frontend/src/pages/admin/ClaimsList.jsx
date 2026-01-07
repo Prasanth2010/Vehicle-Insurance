@@ -1,19 +1,18 @@
 
-//grok
-
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import AdminNavbar from '../../components/AdminNavbar';
 
 export default function ClaimsList() {
   const [claims, setClaims] = useState([]);
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
-    axios.get('http://localhost:8080/admin/claims').then(res => setClaims(res.data));
+    axios.get(`${API_BASE_URL}/admin/claims`).then(res => setClaims(res.data));
   }, []);
 
   const updateStatus = async (id, status) => {
-    await axios.put(`http://localhost:8080/admin/claims/${id}/status`, { status });
+    await axios.put(`${API_BASE_URL}/admin/claims/${id}/status`, { status });
     setClaims(claims.map(c => c.id === id ? { ...c, status } : c));
   };
 
@@ -35,7 +34,7 @@ export default function ClaimsList() {
                   <option>REJECTED</option>
                 </select>
               </p>
-              {claim.damagePhotoPath && <img src={`http://localhost:8080${claim.damagePhotoPath}`} alt="Damage" className="mt-6 w-full rounded-xl" />}
+              {claim.damagePhotoPath && <img src={`${API_BASE_URL}${claim.damagePhotoPath}`} alt="Damage" className="mt-6 w-full rounded-xl" />}
             </div>
           ))}
         </div>

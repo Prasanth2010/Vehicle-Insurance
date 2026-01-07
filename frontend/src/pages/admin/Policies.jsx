@@ -8,6 +8,7 @@ export default function Policies() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterPlan, setFilterPlan] = useState('ALL');
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     fetchPolicies();
@@ -15,7 +16,7 @@ export default function Policies() {
 
   const fetchPolicies = async () => {
     try {
-      const res = await axios.get('http://localhost:8080/api/policies');
+      const res = await axios.get(`${API_BASE_URL}/api/policies`);
       setPolicies(res.data);
     } catch (err) {
       console.error('Failed to fetch policies:', err);
@@ -28,7 +29,7 @@ export default function Policies() {
   const deactivatePolicy = async (id) => {
     if (window.confirm('Are you sure you want to deactivate this policy? Existing customers will keep their coverage.')) {
       try {
-        await axios.put(`http://localhost:8080/api/policies/${id}/inactive`);
+        await axios.put(`${API_BASE_URL}/api/policies/${id}/inactive`);
         setPolicies(policies.map(p => p.id === id ? { ...p, status: 'inactive' } : p));
         alert('Policy deactivated successfully');
       } catch (err) {
@@ -41,7 +42,7 @@ export default function Policies() {
   const activatePolicy = async (id) => {
     if (window.confirm('Are you sure you want to activate this policy?')) {
       try {
-        await axios.put(`http://localhost:8080/api/policies/${id}/active`);
+        await axios.put(`${API_BASE_URL}/api/policies/${id}/active`);
         setPolicies(policies.map(p => p.id === id ? { ...p, status: 'active' } : p));
         alert('Policy activated successfully');
       } catch (err) {
@@ -54,7 +55,7 @@ export default function Policies() {
   const deletePolicy = async (id, name) => {
     if (window.confirm(`Are you sure you want to permanently delete policy "${name}"? This action cannot be undone.`)) {
       try {
-        await axios.delete(`http://localhost:8080/api/policies/${id}`);
+        await axios.delete(`${API_BASE_URL}/api/policies/${id}`);
         setPolicies(policies.filter(p => p.id !== id));
         alert('Policy deleted successfully');
       } catch (err) {
@@ -350,7 +351,7 @@ function StatCard({ title, value, color }) {
 
 //   const fetchPolicies = async () => {
 //     try {
-//       const res = await axios.get('http://localhost:8080/api/policies');
+//       const res = await axios.get('${API_BASE_URL}/api/policies');
 //       setPolicies(res.data);
 //     } catch (err) {
 //       console.error('Failed to fetch policies:', err);
@@ -362,7 +363,7 @@ function StatCard({ title, value, color }) {
 //   const deactivatePolicy = async (id) => {
 //     if (window.confirm('Are you sure you want to deactivate this policy? Existing customers will keep their coverage.')) {
 //       try {
-//         await axios.put(`http://localhost:8080/api/policies/${id}/inactive`);
+//         await axios.put(`${API_BASE_URL}/api/policies/${id}/inactive`);
 //         setPolicies(policies.map(p => p.id === id ? { ...p, status: 'inactive' } : p));
 //       } catch (err) {
 //         console.error('Failed to deactivate policy:', err);
@@ -373,7 +374,7 @@ function StatCard({ title, value, color }) {
 
 //   const activatePolicy = async (id) => {
 //     try {
-//       await axios.put(`http://localhost:8080/api/policies/${id}/active`);
+//       await axios.put(`${API_BASE_URL}/api/policies/${id}/active`);
 //       setPolicies(policies.map(p => p.id === id ? { ...p, status: 'active' } : p));
 //     } catch (err) {
 //       console.error('Failed to activate policy:', err);
@@ -384,7 +385,7 @@ function StatCard({ title, value, color }) {
 //   const deletePolicy = async (id, name) => {
 //     if (window.confirm(`Are you sure you want to permanently delete policy "${name}"? This action cannot be undone.`)) {
 //       try {
-//         await axios.delete(`http://localhost:8080/api/policies/${id}`);
+//         await axios.delete(`${API_BASE_URL}/api/policies/${id}`);
 //         setPolicies(policies.filter(p => p.id !== id));
 //       } catch (err) {
 //         console.error('Failed to delete policy:', err);

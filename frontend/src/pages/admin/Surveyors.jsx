@@ -20,6 +20,7 @@ export default function Surveyors() {
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     fetchSurveyors();
@@ -28,7 +29,7 @@ export default function Surveyors() {
   const fetchSurveyors = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('http://localhost:8080/admin/users');
+      const res = await axios.get(`${API_BASE_URL}/admin/users`);
       const allUsers = Array.isArray(res.data) ? res.data : Object.values(res.data).flat();
       const surveyorList = allUsers.filter(u => u.role === 'SURVEYOR');
 
@@ -65,7 +66,7 @@ export default function Surveyors() {
     }
 
     try {
-      await axios.put(`http://localhost:8080/admin/users/${editingId}`, editForm);
+      await axios.put(`${API_BASE_URL}/admin/users/${editingId}`, editForm);
       alert('Surveyor updated successfully!');
       cancelEdit();
       fetchSurveyors();
@@ -79,7 +80,7 @@ export default function Surveyors() {
     const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
     if (window.confirm(`Set "${name}" as ${newStatus.toUpperCase()}?`)) {
       try {
-        await axios.put(`http://localhost:8080/admin/users/${id}/status`, { status: newStatus });
+        await axios.put(`${API_BASE_URL}/admin/users/${id}/status`, { status: newStatus });
         alert(`Surveyor is now ${newStatus}`);
         fetchSurveyors();
       } catch (err) {
@@ -91,7 +92,7 @@ export default function Surveyors() {
   const deleteSurveyor = async (id, name) => {
     if (window.confirm(`Permanently delete "${name}"? This cannot be undone.`)) {
       try {
-        await axios.delete(`http://localhost:8080/admin/users/${id}`);
+        await axios.delete(`${API_BASE_URL}/admin/users/${id}`);
         alert('Surveyor deleted');
         fetchSurveyors();
       } catch (err) {
@@ -334,7 +335,7 @@ export default function Surveyors() {
 
 //   const fetchSurveyors = async () => {
 //     try {
-//       const res = await axios.get('http://localhost:8080/admin/users');
+//       const res = await axios.get('${API_BASE_URL}/admin/users');
 //       const allUsers = Object.values(res.data).flat();
 //       const surveyorList = allUsers.filter(u => u.role === 'SURVEYOR');
 //       setSurveyors(surveyorList);
@@ -370,7 +371,7 @@ export default function Surveyors() {
 
 //   const handleUpdate = async () => {
 //     try {
-//       await axios.put(`http://localhost:8080/admin/users/${editingId}`, editForm);
+//       await axios.put(`${API_BASE_URL}/admin/users/${editingId}`, editForm);
 //       setEditingId(null);
 //       fetchSurveyors();
 //     } catch (err) {
@@ -381,7 +382,7 @@ export default function Surveyors() {
 //   const handleDelete = async (id, name) => {
 //     if (window.confirm(`Are you sure you want to delete surveyor "${name}"? This action cannot be undone.`)) {
 //       try {
-//         await axios.delete(`http://localhost:8080/admin/users/${id}`);
+//         await axios.delete(`${API_BASE_URL}/admin/users/${id}`);
 //         fetchSurveyors();
 //       } catch (err) {
 //         alert('Error deleting surveyor. Please try again.');
@@ -393,7 +394,7 @@ export default function Surveyors() {
 //     const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
 //     if (window.confirm(`Change surveyor "${name}" status to ${newStatus}?`)) {
 //       try {
-//         await axios.put(`http://localhost:8080/admin/users/${id}/status`, { status: newStatus });
+//         await axios.put(`${API_BASE_URL}/admin/users/${id}/status`, { status: newStatus });
 //         fetchSurveyors();
 //       } catch (err) {
 //         alert('Error updating status. Please try again.');

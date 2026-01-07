@@ -20,6 +20,7 @@ export default function RegisterSurveyor() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [messageType, setMessageType] = useState('');
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -32,7 +33,7 @@ export default function RegisterSurveyor() {
   setMessageType('');
 
   try {
-    await axios.post('http://localhost:8080/admin/register-surveyor', formData);
+    await axios.post(`${API_BASE_URL}/admin/register-surveyor`, formData);
     setMessage('Surveyor account created successfully!');
     setMessageType('success');
     // Clear form or redirect

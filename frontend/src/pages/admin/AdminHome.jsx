@@ -6,6 +6,7 @@ export default function AdminHome() {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const [stats, setStats] = useState({ users: 0, claims: 0, policies: 0, applications: 0 });
   const [loading, setLoading] = useState(true);
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     fetchStats();
@@ -14,9 +15,9 @@ export default function AdminHome() {
   const fetchStats = async () => {
     try {
       const [usersRes, claimsRes, policiesRes] = await Promise.all([
-        axios.get('http://localhost:8080/admin/users'),
-        axios.get('http://localhost:8080/admin/claims'),
-        axios.get('http://localhost:8080/api/policies')
+        axios.get(`${API_BASE_URL}/admin/users`),
+        axios.get(`${API_BASE_URL}/admin/claims`),
+        axios.get(`${API_BASE_URL}/api/policies`)
       ]);
       
       const totalUsers = Object.values(usersRes.data).flat().length;

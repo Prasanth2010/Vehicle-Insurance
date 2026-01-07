@@ -41,7 +41,7 @@
 
 //   const fetchAssignedClaims = async () => {
 //     try {
-//       const res = await axios.get(`http://localhost:8080/api/claims/surveyor/${user.id}`);
+//       const res = await axios.get(`${API_BASE_URL}/api/claims/surveyor/${user.id}`);
 //       setAssignedClaims(res.data);
 //     } catch (err) {
 //       console.error('Failed to fetch assigned claims:', err);
@@ -76,7 +76,7 @@
 //     });
 
 //     try {
-//       await axios.post(`http://localhost:8080/api/claims/${selectedClaim.id}/survey-report`, formData, {
+//       await axios.post(`${API_BASE_URL}/api/claims/${selectedClaim.id}/survey-report`, formData, {
 //         headers: { 'Content-Type': 'multipart/form-data' }
 //       });
 
@@ -299,7 +299,7 @@
 //                   <p className="text-gray-700 mb-4 leading-relaxed">{selectedClaim.description}</p>
 //                   {selectedClaim.damagePhotoPath && (
 //                     <img 
-//                       src={`http://localhost:8080${selectedClaim.damagePhotoPath}`}
+//                       src={`${API_BASE_URL}${selectedClaim.damagePhotoPath}`}
 //                       alt="Damage"
 //                       className="w-full rounded-2xl border border-gray-300 shadow-lg"
 //                     />
@@ -517,6 +517,7 @@ export default function SurveyorDashboard() {
   const navigate = useNavigate(); // ← Add this
   const storedUser = localStorage.getItem('user');
   const user = storedUser ? JSON.parse(storedUser) : null;
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const [assignedClaims, setAssignedClaims] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -530,7 +531,7 @@ export default function SurveyorDashboard() {
 
   const fetchAssignedClaims = async () => {
     try {
-      const res = await axios.get(`http://localhost:8080/api/claims/surveyor/${user.id}`);
+      const res = await axios.get(`${API_BASE_URL}/api/claims/surveyor/${user.id}`);
       setAssignedClaims(res.data);
     } catch (err) {
       console.error('Failed to fetch assigned claims:', err);

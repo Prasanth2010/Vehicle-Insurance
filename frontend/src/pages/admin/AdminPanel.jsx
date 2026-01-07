@@ -28,6 +28,8 @@ export default function AdminPanel() {
     policies: 0, 
     applications: 0 
   });
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const [systemStatus, setSystemStatus] = useState('Checking...');
   const [statusColor, setStatusColor] = useState('text-gray-600');
   const [loading, setLoading] = useState(true);
@@ -47,9 +49,9 @@ export default function AdminPanel() {
   const fetchStats = async () => {
     try {
       const [usersRes, claimsRes, policiesRes] = await Promise.all([
-        axios.get('http://localhost:8080/admin/users'),
-        axios.get('http://localhost:8080/admin/claims'),
-        axios.get('http://localhost:8080/api/policies')
+        axios.get(`${API_BASE_URL}/admin/users`),
+        axios.get(`${API_BASE_URL}/admin/claims`),
+        axios.get(`${API_BASE_URL}/api/policies`)
       ]);
       const totalUsers = Object.values(usersRes.data).flat().length;
       setStats({
@@ -68,7 +70,7 @@ export default function AdminPanel() {
   const fetchRecentActivities = async () => {
     try {
       // Fetch recent claims
-      const claimsRes = await axios.get('http://localhost:8080/admin/claims');
+      const claimsRes = await axios.get(`${API_BASE_URL}/admin/claims`);
       const recentClaims = claimsRes.data
         .slice(-5) // Get last 5 claims
         .map(claim => ({
@@ -82,7 +84,7 @@ export default function AdminPanel() {
         }));
 
       // Fetch recent users (adjust endpoint as needed)
-      const usersRes = await axios.get('http://localhost:8080/admin/users');
+      const usersRes = await axios.get(`${API_BASE_URL}/admin/users`);
       const recentUsers = Object.values(usersRes.data)
         .flat()
         .slice(-3) // Get last 3 users
@@ -97,7 +99,7 @@ export default function AdminPanel() {
         }));
 
       // Fetch recent policies
-      const policiesRes = await axios.get('http://localhost:8080/api/policies');
+      const policiesRes = await axios.get(`${API_BASE_URL}/api/policies`);
       const recentPolicies = policiesRes.data
         .slice(-2) // Get last 2 policies
         .map(policy => ({
@@ -146,7 +148,7 @@ export default function AdminPanel() {
   };
 const fetchSystemStatus = async () => {
   try {
-    const res = await axios.get('http://localhost:8080/actuator/health');
+    const res = await axios.get('${API_BASE_URL}/actuator/health');
     
     if (res.data.status === 'UP') {
       setSystemStatus('Online');
@@ -163,7 +165,7 @@ const fetchSystemStatus = async () => {
 };
   // const fetchSystemStatus = async () => {
   //   try {
-  //     await axios.get('http://localhost:8080/health');
+  //     await axios.get('${API_BASE_URL}/health');
   //     setSystemStatus(prev => ({ ...prev, api: true }));
   //   } catch {
   //     setSystemStatus(prev => ({ ...prev, api: false }));
@@ -635,9 +637,9 @@ function StatusItem({ title, status, isHealthy, showIcon = true }) {
 //   const fetchStats = async () => {
 //     try {
 //       const [usersRes, claimsRes, policiesRes] = await Promise.all([
-//         axios.get('http://localhost:8080/admin/users'),
-//         axios.get('http://localhost:8080/admin/claims'),
-//         axios.get('http://localhost:8080/api/policies')
+//         axios.get('${API_BASE_URL}/admin/users'),
+//         axios.get('${API_BASE_URL}/admin/claims'),
+//         axios.get('${API_BASE_URL}/api/policies')
 //       ]);
 //       const totalUsers = Object.values(usersRes.data).flat().length;
 //       setStats({

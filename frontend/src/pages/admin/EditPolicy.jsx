@@ -22,10 +22,11 @@ export default function EditPolicy() {
   useEffect(() => {
     fetchPolicy();
   }, [id]);
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const fetchPolicy = async () => {
     try {
-      const res = await axios.get(`http://localhost:8080/api/policies/${id}`);
+      const res = await axios.get(`${API_BASE_URL}/api/policies/${id}`);
       const policyData = res.data;
       setPolicy(policyData);
       setFormData({
@@ -48,7 +49,7 @@ export default function EditPolicy() {
     setSaving(true);
 
     try {
-      await axios.put(`http://localhost:8080/api/policies/${id}`, formData);
+      await axios.put(`${API_BASE_URL}/api/policies/${id}`, formData);
       alert('Policy updated successfully!');
       navigate('/admin/policies');
     } catch (err) {

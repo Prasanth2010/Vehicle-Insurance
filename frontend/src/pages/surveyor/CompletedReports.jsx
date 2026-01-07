@@ -10,6 +10,7 @@ export default function CompletedReports() {
   const navigate = useNavigate();
   const storedUser = localStorage.getItem('user');
   const user = storedUser ? JSON.parse(storedUser) : null;
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const [completedClaims, setCompletedClaims] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +23,7 @@ export default function CompletedReports() {
 
     const fetchCompleted = async () => {
       try {
-        const res = await axios.get(`http://localhost:8080/api/claims/surveyor/${user.id}`);
+        const res = await axios.get(`${API_BASE_URL}/api/claims/surveyor/${user.id}`);
         const completed = res.data.filter(claim => claim.status === 'SURVEY_COMPLETED');
         setCompletedClaims(completed);
       } catch (err) {

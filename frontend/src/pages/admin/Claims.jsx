@@ -8,6 +8,7 @@ export default function Claims() {
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     fetchClaims();
@@ -16,7 +17,7 @@ export default function Claims() {
 
   const fetchClaims = async () => {
     try {
-      const res = await axios.get('http://localhost:8080/admin/claims');
+      const res = await axios.get(`${API_BASE_URL}/admin/claims`);
       console.log('Claims fetched:', res.data);
       setClaims(res.data);
     } catch (err) {
@@ -28,7 +29,7 @@ export default function Claims() {
 
   const fetchSurveyors = async () => {
     try {
-      const res = await axios.get('http://localhost:8080/api/claims/admin/surveyors');
+      const res = await axios.get(`${API_BASE_URL}/api/claims/admin/surveyors`);
       console.log('Surveyors fetched:', res.data); // ← Check this in console!
       setSurveyors(res.data);
     } catch (err) {
@@ -44,7 +45,7 @@ export default function Claims() {
     }
 
     try {
-      await axios.post(`http://localhost:8080/admin/claims/${claimId}/assign`, {
+      await axios.post(`${API_BASE_URL}/admin/claims/${claimId}/assign`, {
         surveyorId: parseInt(surveyorId)
       });
 
@@ -74,7 +75,7 @@ export default function Claims() {
 
   const finalDecision = async (claimId, finalStatus, finalAmount = 0) => {
   try {
-    await axios.post(`http://localhost:8080/admin/claims/${claimId}/final-decision`, {
+    await axios.post(`${API_BASE_URL}/admin/claims/${claimId}/final-decision`, {
       finalStatus,
       finalApprovedAmount: parseFloat(finalAmount)
     });
@@ -102,7 +103,7 @@ export default function Claims() {
   const handleDeleteClaim = async (claimId, claimName) => {
   if (window.confirm(`Permanently delete claim "${claimName}" (ID: ${claimId})? This cannot be undone.`)) {
     try {
-      await axios.delete(`http://localhost:8080/admin/claims/${claimId}`);
+      await axios.delete(`${API_BASE_URL}/admin/claims/${claimId}`);
       alert('Claim deleted successfully');
       fetchClaims(); // Refresh list
     } catch (err) {
@@ -227,7 +228,7 @@ export default function Claims() {
                         <p className="text-sm text-gray-900 font-medium line-clamp-2 mb-2">{claim.description}</p>
                         {claim.damagePhotoPath && (
                           <button
-                            onClick={() => window.open(`http://localhost:8080${claim.damagePhotoPath}`, '_blank')}
+                            onClick={() => window.open(`${API_BASE_URL}${claim.damagePhotoPath}`, '_blank')}
                             className="text-xs text-blue-600 hover:underline"
                           >
                             🖼️ View Photo

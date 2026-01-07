@@ -8,6 +8,7 @@ export default function Claims() {
   const [loading, setLoading] = useState(true);
   const [filterStatus, setFilterStatus] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     fetchClaims();
@@ -16,7 +17,7 @@ export default function Claims() {
 
   const fetchClaims = async () => {
     try {
-      const res = await axios.get('http://localhost:8080/admin/claims');
+      const res = await axios.get(`${API_BASE_URL}/admin/claims`);
       setClaims(res.data);
     } catch (err) {
       console.error('Failed to fetch claims:', err);
@@ -27,7 +28,7 @@ export default function Claims() {
 
   const fetchSurveyors = async () => {
     try {
-      const res = await axios.get('http://localhost:8080/admin/surveyors');
+      const res = await axios.get(`${API_BASE_URL}/admin/surveyors`);
       setSurveyors(res.data);
     } catch (err) {
       console.error('Failed to fetch surveyors:', err);
@@ -38,7 +39,7 @@ export default function Claims() {
   const assignToSurveyor = async (claimId, surveyorId) => {
     if (!surveyorId) return;
     try {
-      await axios.post(`http://localhost:8080/admin/claims/${claimId}/assign`, {
+      await axios.post(`${API_BASE_URL}/admin/claims/${claimId}/assign`, {
         surveyorId: parseInt(surveyorId)
       });
 
@@ -54,7 +55,7 @@ export default function Claims() {
 
   const finalDecision = async (claimId, finalStatus, amount) => {
     try {
-      await axios.post(`http://localhost:8080/admin/claims/${claimId}/final-decision`, {
+      await axios.post(`${API_BASE_URL}/admin/claims/${claimId}/final-decision`, {
         finalStatus,
         finalApprovedAmount: parseFloat(amount || 0)
       });
@@ -164,7 +165,7 @@ export default function Claims() {
                     <td className="px-6 py-4">
                       <p className="text-sm text-gray-900 font-medium line-clamp-2 mb-2">{claim.description}</p>
                       {claim.damagePhotoPath && (
-                        <button onClick={() => window.open(`http://localhost:8080${claim.damagePhotoPath}`, '_blank')}
+                        <button onClick={() => window.open(`${API_BASE_URL}${claim.damagePhotoPath}`, '_blank')}
                           className="text-xs text-blue-600">View Photo</button>
                       )}
                     </td>
@@ -290,7 +291,7 @@ function StatCard({ title, value, color }) {
 
 //   const fetchClaims = async () => {
 //     try {
-//       const res = await axios.get('http://localhost:8080/admin/claims');
+//       const res = await axios.get('${API_BASE_URL}/admin/claims');
 //       setClaims(res.data);
 //     } catch (err) {
 //       console.error('Failed to fetch claims:', err);
@@ -301,7 +302,7 @@ function StatCard({ title, value, color }) {
 
 //   const updateStatus = async (id, status) => {
 //     try {
-//       await axios.put(`http://localhost:8080/admin/claims/${id}/status`, { status });
+//       await axios.put(`${API_BASE_URL}/admin/claims/${id}/status`, { status });
 //       setClaims(claims.map(c => c.id === id ? { ...c, status } : c));
 //     } catch (err) {
 //       console.error('Failed to update status:', err);
@@ -398,7 +399,7 @@ function StatCard({ title, value, color }) {
 //                         {claim.damagePhotoPath && (
 //                           <button 
 //                             className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-//                             onClick={() => window.open(`http://localhost:8080${claim.damagePhotoPath}`, '_blank')}
+//                             onClick={() => window.open(`${API_BASE_URL}${claim.damagePhotoPath}`, '_blank')}
 //                           >
 //                             View Damage Photos →
 //                           </button>

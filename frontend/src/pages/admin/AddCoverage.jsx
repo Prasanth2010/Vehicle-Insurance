@@ -15,6 +15,7 @@ export default function AddCoverage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState(''); // 'success' or 'error'
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const coverageTypes = [
     'Collision Coverage',
@@ -40,7 +41,7 @@ export default function AddCoverage() {
     setMessage('');
 
     try {
-      await axios.post(`http://localhost:8080/api/policies/${policyId}/coverages`, coverage);
+      await axios.post(`${API_BASE_URL}/api/policies/${policyId}/coverages`, coverage);
       setMessage('Coverage added successfully!');
       setMessageType('success');
       setCoverage({ type: '', description: '', amount: '' });

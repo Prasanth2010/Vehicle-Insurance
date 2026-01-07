@@ -9,11 +9,12 @@ export default function PolicyDetails() {
   const [policy, setPolicy] = useState(null);
   const [coverages, setCoverages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     Promise.all([
-      axios.get(`http://localhost:8080/api/policies`),
-      axios.get(`http://localhost:8080/api/policies/${id}/coverages`)
+      axios.get(`${API_BASE_URL}/api/policies`),
+      axios.get(`${API_BASE_URL}/api/policies/${id}/coverages`)
     ]).then(([policiesRes, coveragesRes]) => {
       setPolicy(policiesRes.data.find(p => p.id == id));
       setCoverages(coveragesRes.data);

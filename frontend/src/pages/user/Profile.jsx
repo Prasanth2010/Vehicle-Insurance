@@ -11,6 +11,7 @@ export default function Profile() {
   const navigate = useNavigate();
   const storedUser = localStorage.getItem('user');
   const user = storedUser ? JSON.parse(storedUser) : null;
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
@@ -36,7 +37,7 @@ export default function Profile() {
     const fetchProfile = async () => {
   try {
     setLoading(true);
-    const response = await axios.get('http://localhost:8080/api/profile/me');
+    const response = await axios.get(`${API_BASE_URL}/api/profile/me`);
 
     const freshUser = response.data;
 
@@ -75,7 +76,7 @@ export default function Profile() {
   setSaving(true);
 
   try {
-    await axios.put('http://localhost:8080/api/profile/me', profileData);
+    await axios.put(`${API_BASE_URL}/api/profile/me`, profileData);
 
     const updatedUser = { ...user, ...profileData };
     localStorage.setItem('user', JSON.stringify(updatedUser));

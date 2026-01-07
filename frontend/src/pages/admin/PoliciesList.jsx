@@ -4,9 +4,10 @@ import AdminNavbar from '../../components/AdminNavbar';
 
 export default function PoliciesList() {
   const [policies, setPolicies] = useState([]);
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
-    axios.get('http://localhost:8080/api/policies')
+    axios.get(`${API_BASE_URL}/api/policies`)
       .then(res => setPolicies(res.data));
   }, []);
 

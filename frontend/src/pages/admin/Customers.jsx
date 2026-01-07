@@ -20,6 +20,7 @@ export default function Customers() {
   const [editForm, setEditForm] = useState({});
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     fetchCustomers();
@@ -28,7 +29,7 @@ export default function Customers() {
   const fetchCustomers = async () => {
     setLoading(true);
     try {
-      const res = await axios.get('http://localhost:8080/admin/users');
+      const res = await axios.get(`${API_BASE_URL}/admin/users`);
       const allUsers = Array.isArray(res.data) ? res.data : Object.values(res.data).flat();
       const customerList = allUsers.filter(u => u.role === 'USER');
       setCustomers(customerList);
@@ -67,7 +68,7 @@ export default function Customers() {
     }
 
     try {
-      await axios.put(`http://localhost:8080/admin/users/${editingId}`, editForm);
+      await axios.put(`${API_BASE_URL}/admin/users/${editingId}`, editForm);
       alert('Customer updated successfully!');
       cancelEdit();
       fetchCustomers(); // Refresh list
@@ -80,7 +81,7 @@ export default function Customers() {
   const deleteCustomer = async (id, name) => {
     if (window.confirm(`Permanently delete customer "${name}"? This action cannot be undone.`)) {
       try {
-        await axios.delete(`http://localhost:8080/admin/users/${id}`);
+        await axios.delete(`${API_BASE_URL}/admin/users/${id}`);
         alert('Customer deleted successfully');
         fetchCustomers(); // Refresh list
       } catch (err) {
@@ -377,7 +378,7 @@ export default function Customers() {
 
 //   const fetchCustomers = async () => {
 //     try {
-//       const res = await axios.get('http://localhost:8080/admin/users');
+//       const res = await axios.get('${API_BASE_URL}/admin/users');
 //       const allUsers = Object.values(res.data).flat();
 //       const userCustomers = allUsers.filter(u => u.role === 'USER');
 //       setCustomers(userCustomers);

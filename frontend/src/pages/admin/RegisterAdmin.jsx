@@ -20,6 +20,7 @@ export default function RegisterAdmin() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [messageType, setMessageType] = useState(''); // 'success' or 'error'
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -32,7 +33,7 @@ export default function RegisterAdmin() {
   setMessageType('');
 
   try {
-    await axios.post('http://localhost:8080/admin/register-admin', formData);
+    await axios.post(`${API_BASE_URL}/admin/register-admin`, formData);
     setMessage('Admin account created successfully!');
     setMessageType('success');
   } catch (err) {

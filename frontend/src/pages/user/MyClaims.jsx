@@ -13,6 +13,7 @@ export default function MyClaims() {
 
   const [claims, setClaims] = useState([]);
   const [loading, setLoading] = useState(true);
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     if (!user || !user.id) {
@@ -23,7 +24,7 @@ export default function MyClaims() {
     const fetchClaims = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(`http://localhost:8080/api/claims/my?userId=${user.id}`);
+        const res = await axios.get(`${API_BASE_URL}/api/claims/my?userId=${user.id}`);
         // Sort by newest first
         const sortedClaims = res.data.sort((a, b) => new Date(b.submissionDate) - new Date(a.submissionDate));
         setClaims(sortedClaims);

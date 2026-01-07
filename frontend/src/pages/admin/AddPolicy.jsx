@@ -11,6 +11,7 @@ export default function AddPolicy() {
   });
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,7 +19,7 @@ export default function AddPolicy() {
     setMessage('');
     
     try {
-      await axios.post('http://localhost:8080/admin/policies', policy);
+      await axios.post(`${API_BASE_URL}/admin/policies`, policy);
       setMessage('Policy added successfully!');
       setPolicy({ name: '', description: '', plan: '', premiumAmount: '' });
     } catch (err) {

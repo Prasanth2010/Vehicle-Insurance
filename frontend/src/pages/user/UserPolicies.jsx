@@ -10,6 +10,7 @@ export default function UserPolicies() {
   const navigate = useNavigate();
   const storedUser = localStorage.getItem('user');
   const user = storedUser ? JSON.parse(storedUser) : null;
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const [policies, setPolicies] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,7 +24,7 @@ export default function UserPolicies() {
     const fetchPolicies = async () => {
       try {
         setLoading(true);
-        const res = await axios.get('http://localhost:8080/api/policies');
+        const res = await axios.get(`${API_BASE_URL}/api/policies`);
         setPolicies(res.data || []);
       } catch (err) {
         console.error('Failed to fetch policies:', err);

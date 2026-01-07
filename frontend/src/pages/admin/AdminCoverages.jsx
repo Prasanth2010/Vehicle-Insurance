@@ -9,6 +9,7 @@ import { PlusCircleIcon, ShieldCheckIcon } from '@heroicons/react/24/outline';
 export default function AdminCoverages() {
   const [policies, setPolicies] = useState([]);
   const [loading, setLoading] = useState(true);
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     fetchPoliciesWithCoverages();
@@ -16,14 +17,14 @@ export default function AdminCoverages() {
 
   const fetchPoliciesWithCoverages = async () => {
     try {
-      const policiesRes = await axios.get('http://localhost:8080/api/policies');
+      const policiesRes = await axios.get(`${API_BASE_URL}/api/policies`);
       const policiesData = policiesRes.data;
 
       // Fetch coverages for each policy
       const policiesWithCoverages = await Promise.all(
         policiesData.map(async (policy) => {
           try {
-            const covRes = await axios.get(`http://localhost:8080/api/policies/${policy.id}/coverages`);
+            const covRes = await axios.get(`${API_BASE_URL}/api/policies/${policy.id}/coverages`);
             return { ...policy, coverages: covRes.data };
           } catch (err) {
             console.warn(`No coverages for policy ${policy.id}`);

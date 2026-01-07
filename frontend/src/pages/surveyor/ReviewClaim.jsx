@@ -13,7 +13,8 @@ import {
 export default function ReviewClaim() {
   const navigate = useNavigate();
   const location = useLocation();
-  
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const claim = location.state?.claim;
 
   const storedUser = localStorage.getItem('user');
@@ -60,7 +61,7 @@ export default function ReviewClaim() {
 
     setSubmitting(true);
     try {
-      await axios.post(`http://localhost:8080/api/claims/${claim.id}/survey-report`, formData, {
+      await axios.post(`${API_BASE_URL}/api/claims/${claim.id}/survey-report`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       alert(`Review submitted successfully — Recommendation: ${reviewData.recommendation}`);
@@ -113,7 +114,7 @@ export default function ReviewClaim() {
                   <div>
                     <p className="font-bold text-gray-900 mb-4 text-lg">Damage Photo Submitted by Customer</p>
                     <img 
-                      src={`http://localhost:8080${claim.damagePhotoPath}`}
+                      src={`${API_BASE_URL}${claim.damagePhotoPath}`}
                       alt="Customer damage"
                       className="w-full rounded-2xl border-4 border-gray-300 shadow-xl"
                       onError={(e) => e.target.src = 'https://via.placeholder.com/800x600?text=Photo+Not+Available'}

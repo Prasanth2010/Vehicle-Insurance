@@ -148,7 +148,7 @@ export default function AdminPanel() {
   };
 const fetchSystemStatus = async () => {
   try {
-    const res = await axios.get('${API_BASE_URL}/actuator/health');
+    const res = await axios.get(`${API_BASE_URL}/actuator/health`);
     
     if (res.data.status === 'UP') {
       setSystemStatus('Online');

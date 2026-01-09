@@ -22,7 +22,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/claims")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*")
 public class ClaimController {
 
     @Autowired
@@ -199,7 +199,7 @@ public class ClaimController {
 
 // @RestController
 // @RequestMapping("/api/claims")  // ← Keeping your original base path
-// @CrossOrigin(origins = "http://localhost:5173")
+// @CrossOrigin(origins = "*")
 // public class ClaimController {
 
 //     @Autowired

@@ -21,7 +21,7 @@ public class CorsConfig {
         config.setAllowCredentials(true);
         // Allow local dev and deployed frontend
         config.setAllowedOrigins(Arrays.asList(
-                "http://localhost:5173",
+                "*",
                 "https://vehicle-insurance-yyxc-ce64v5qqd-prasanth-ms-projects-56fe251d.vercel.app",
                 "https://vehicle-insurance-yyxc-q8zl2stio-prasanth-ms-projects-56fe251d.vercel.app"
         ));

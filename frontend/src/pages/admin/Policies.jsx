@@ -16,8 +16,18 @@ export default function Policies() {
 
   const fetchPolicies = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/api/policies`);
-      setPolicies(res.data);
+    const token = localStorage.getItem("token");
+
+    const res = await axios.get(
+      `${API_BASE_URL}/api/policies`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    setPolicies(res.data);
     } catch (err) {
       console.error('Failed to fetch policies:', err);
       alert('Failed to load policies');
